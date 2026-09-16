@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventory Management — {{ pharmacy.shop_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Header Banner -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+      <div class="badge bg-teal bg-opacity-10 text-teal px-3 py-2 rounded-pill fw-bold mb-2" style="color: #0d9488 !important;">
+        <i class="bi bi-shop me-1"></i> {{ pharmacy.shop_name }} Inventory
+      </div>
+      <h2 class="fw-bold text-dark mb-0">Pharmacy Inventory Management</h2>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('admin_bp.add_medicine') }}" class="btn btn-primary-custom rounded-pill px-4 py-2">
+        <i class="bi bi-plus-circle me-1"></i> Add New Medicine
+      </a>
+      <a href="{{ url_for('admin_bp.dashboard') }}" class="btn btn-outline-custom rounded-pill px-3 py-2">
+        <i class="bi bi-speedometer2 me-1"></i> Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- Search, Filter & Sort Controls Card (Phase 8) -->
+  <div class="card card-glass p-3 mb-4">
+    <form action="{{ url_for('admin_bp.medicines') }}" method="GET" class="row g-3 align-items-center">
+      <!-- Search input -->
+      <div class="col-lg-5 col-md-6">
+        <div class="input-group">
+          <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+          <input type="text" name="q" class="form-control" placeholder="Search by medicine name, generic ingredient, or category..." value="{{ search_query or '' }}">
+          {% if search_query %}
+            <a href="{{ url_for('admin_bp.medicines') }}" class="btn btn-outline-secondary" title="Clear Search"><i class="bi bi-x-lg"></i></a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Filter dropdown -->
+      <div class="col-lg-3 col-md-3 col-sm-6">
+        <div class="input-group">
+          <label class="input-group-text bg-white"><i class="bi bi-funnel"></i></label>
+          <select name="status" class="form-select" onchange="this.form.submit()">
+            <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Statuses</option>
+            <option value="available" {% if status_filter == 'available' %}selected{% endif %}>Available Only</option>
+            <option value="out_of_stock" {% if status_filter == 'out_of_stock' %}selected{% endif %}>Out of Stock Only</option>
+            <option value="expired" {% if status_filter == 'expired' %}selected{% endif %}>Expired Only</option>
+            <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive Only</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Sort dropdown -->
+      <div class="col-lg-3 col-md-3 col-sm-6">
+        <div class="input-group">
+          <label class="input-group-text bg-white"><i class="bi bi-sort-down"></i></label>
+          <select name="sort" class="form-select" onchange="this.form.submit()">
+            <option value="updated" {% if sort_by == 'updated' %}selected{% endif %}>Recently Updated</option>
+            <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Medicine Name (A-Z)</option>
+            <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+            <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+            <option value="stock_asc" {% if sort_by == 'stock_asc' %}selected{% endif %}>Stock: Low to High</option>
+            <option value="stock_desc" {% if sort_by == 'stock_desc' %}selected{% endif %}>Stock: High to Low</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="col-lg-1 col-md-12 text-end">
+        <button type="submit" class="btn btn-teal text-white w-100 rounded-pill" style="background-color: #0d9488 !important;">Filter</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Inventory Table Card -->
+  <div class="card card-glass p-4">
+    {% if inventory %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Medicine</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Expiry Date</th>
+              <th>Status</th>
+              <th class="text-center">Quick Update</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in inventory %}
+              <tr class="{% if not item.is_active %}table-secondary opacity-75{% endif %}">
+                <!-- Medicine info -->
+                <td>
+                  <div class="fw-bold text-dark fs-6">{{ item.medicine.medicine_name }}</div>
+                  {% if item.medicine.generic_name %}
+                    <div class="small text-muted"><i class="bi bi-prescription me-1"></i> {{ item.medicine.generic_name }}</div>
+                  {% endif %}
+                  {% if item.medicine.uses %}
+                    <div class="small text-muted text-truncate" style="max-width: 250px;" title="{{ item.medicine.uses }}">Uses: {{ item.medicine.uses }}</div>
+                  {% endif %}
+                </td>
+
+                <!-- Category -->
+                <td>
+                  <span class="badge bg-light text-dark border">{{ item.medicine.category or 'General' }}</span>
+                </td>
+
+                <!-- Price -->
+                <td class="fw-bold text-dark fs-6">
+                  ₹{{ "%.2f"|format(item.price) }}
+                </td>
+
+                <!-- Stock -->
+                <td>
+                  {% if item.stock_quantity > 10 %}
+                    <span class="badge bg-success-subtle text-success border border-success px-2 py-1 fs-6">{{ item.stock_quantity }} units</span>
+                  {% elif item.stock_quantity > 0 %}
+                    <span class="badge bg-warning-subtle text-warning border border-warning px-2 py-1 fs-6">{{ item.stock_quantity }} low stock</span>
+                  {% else %}
+                    <span class="badge bg-danger-subtle text-danger border border-danger px-2 py-1 fs-6">0 out of stock</span>
+                  {% endif %}
+                </td>
+
+                <!-- Expiry Date -->
+                <td>
+                  {% if item.expiry_date %}
+                    {% if item.is_expired %}
+                      <span class="text-danger fw-bold"><i class="bi bi-exclamation-octagon me-1"></i> {{ item.expiry_date.strftime('%b %d, %Y') }} (Expired)</span>
+                    {% else %}
+                      <span class="text-muted"><i class="bi bi-calendar me-1"></i> {{ item.expiry_date.strftime('%b %d, %Y') }}</span>
+                    {% endif %}
+                  {% else %}
+                    <span class="text-muted small">N/A</span>
+                  {% endif %}
+                </td>
+
+                <!-- Status Badge -->
+                <td>
+                  {% if item.status == 'Available' %}
+                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Available</span>
+                  {% elif item.status == 'Out of Stock' %}
+                    <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-circle me-1"></i> Out of Stock</span>
+                  {% elif item.status == 'Expired' %}
+                    <span class="badge bg-danger"><i class="bi bi-calendar-x me-1"></i> Expired</span>
+                  {% else %}
+                    <span class="badge bg-secondary"><i class="bi bi-slash-circle me-1"></i> Inactive</span>
+                  {% endif %}
+                </td>
+
+                <!-- Quick Update Button -->
+                <td class="text-center">
+                  <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#quickUpdateModal{{ item.inventory_id }}">
+                    <i class="bi bi-lightning-charge me-1"></i> Price & Stock
+                  </button>
+                </td>
+
+                <!-- Actions -->
+                <td class="text-end">
+                  <div class="btn-group">
+                    <!-- Edit -->
+                    <a href="{{ url_for('admin_bp.edit_medicine', inventory_id=item.inventory_id) }}" class="btn btn-sm btn-outline-primary" title="Edit Medicine Details">
+                      <i class="bi bi-pencil-square"></i>
+                    </a>
+
+                    <!-- Toggle Status (Deactivate / Activate) -->
+                    <form action="{{ url_for('admin_bp.toggle_status', inventory_id=item.inventory_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to {{ 'deactivate' if item.is_active else 'activate' }} {{ item.medicine.medicine_name }}?');">
+                      {% if item.is_active %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Deactivate Medicine">
+                          <i class="bi bi-eye-slash"></i> Deactivate
+                        </button>
+                      {% else %}
+                        <button type="submit" class="btn btn-sm btn-outline-success" title="Activate Medicine">
+                          <i class="bi bi-eye"></i> Activate
+                        </button>
+                      {% endif %}
+                    </form>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Quick Update Modal for item -->
+              <div class="modal fade" id="quickUpdateModal{{ item.inventory_id }}" tabindex="-1" aria-labelledby="quickUpdateLabel{{ item.inventory_id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content rounded-4 shadow">
+                    <div class="modal-header bg-teal text-white" style="background-color: #0d9488 !important;">
+                      <h5 class="modal-title fw-bold" id="quickUpdateLabel{{ item.inventory_id }}">
+                        <i class="bi bi-lightning-charge me-2"></i> Quick Update: {{ item.medicine.medicine_name }}
+                      </h5>
+                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="{{ url_for('admin_bp.quick_update', inventory_id=item.inventory_id) }}" method="POST">
+                      <div class="modal-body p-4">
+                        <div class="mb-3">
+                          <label class="form-label fw-semibold">Unit Price (₹)</label>
+                          <div class="input-group">
+                            <span class="input-group-text fw-bold">₹</span>
+                            <input type="number" step="0.01" min="0.01" class="form-control" name="price" value="{{ item.price }}" required>
+                          </div>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label fw-semibold">Stock Quantity</label>
+                          <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-boxes"></i></span>
+                            <input type="number" min="0" class="form-control" name="stock_quantity" value="{{ item.stock_quantity }}" required>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary-custom rounded-pill">Save Quick Changes</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-search display-4 d-block mb-3 opacity-50"></i>
+        <h5>No medicines found matching your criteria</h5>
+        <p class="small mb-3">Try adjusting your search keywords, clearing status filters, or add a new medicine.</p>
+        <a href="{{ url_for('admin_bp.add_medicine') }}" class="btn btn-primary-custom rounded-pill px-4">
+          <i class="bi bi-plus-circle me-1"></i> Add Medicine
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

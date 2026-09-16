@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+
+{% block title %}RuralCare AI — Find Medicines Near You{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <!-- Hero Section -->
+  <div class="text-center mx-auto mb-5" style="max-width: 850px;">
+    <!-- Location Status Badge -->
+    <div class="mb-3">
+      <span id="locationStatusBadge" class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary px-3 py-2 rounded-pill">
+        <i class="bi bi-geo-alt me-1"></i> Checking location access...
+      </span>
+    </div>
+
+    <h1 class="hero-title display-4 fw-extrabold mb-3" style="font-weight: 800; color: #1e293b;">
+      Find Medicines <span style="background: linear-gradient(135deg, #0d9488, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Near You</span>
+    </h1>
+    <p class="hero-subtitle text-muted fs-5 leading-relaxed mb-4">
+      Instant medicine stock check, price comparison, and nearby rural medical shop finder.
+    </p>
+
+    <!-- Main Search Form (Phase 9 & 10) -->
+    <div class="position-relative mx-auto mb-4" style="max-width: 700px;">
+      <form action="{{ url_for('user_bp.search_page') }}" method="GET" class="search-form">
+        {% if user_lat %}<input type="hidden" name="lat" value="{{ user_lat }}">{% endif %}
+        {% if user_lng %}<input type="hidden" name="lng" value="{{ user_lng }}">{% endif %}
+        
+        <div class="input-group input-group-lg shadow-lg rounded-pill overflow-hidden border border-2 border-teal" style="border-color: #0d9488 !important;">
+          <span class="input-group-text bg-white border-0 ps-4 text-teal" style="color: #0d9488;">
+            <i class="bi bi-search fs-4"></i>
+          </span>
+          <input type="text" id="searchInput" name="q" class="form-control border-0 py-3 fs-5" placeholder="Search medicine... (e.g. Dolo 650, Paracetamol, Cetirizine, ORS)" value="{{ query or '' }}" autocomplete="off" required autofocus>
+          
+          <!-- Voice Search Microphone Button (Phase 9) -->
+          <button type="button" id="voiceSearchBtn" class="btn btn-outline-secondary border-0 px-3 fs-5" title="Voice Search">
+            <i class="bi bi-mic"></i>
+          </button>
+          
+          <button type="submit" class="btn btn-primary-custom px-4 fs-6 fw-bold text-uppercase d-flex align-items-center gap-2">
+            <i class="bi bi-search"></i> Search
+          </button>
+        </div>
+      </form>
+
+      <!-- Live Search Autocomplete Dropdown Container -->
+      <div id="autocompleteDropdown" class="position-absolute w-100 mt-2 text-start z-3 d-none"></div>
+    </div>
+
+    <!-- Quick Search Chips -->
+    <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 mb-5">
+      <span class="small text-muted fw-bold me-2">Popular Searches:</span>
+      <a href="{{ url_for('user_bp.search_page', q='Dolo 650') }}" class="badge bg-white text-dark border shadow-sm px-3 py-2 rounded-pill text-decoration-none hover-shadow">
+        <i class="bi bi-capsule text-teal me-1"></i> Dolo 650
+      </a>
+      <a href="{{ url_for('user_bp.search_page', q='Paracetamol') }}" class="badge bg-white text-dark border shadow-sm px-3 py-2 rounded-pill text-decoration-none hover-shadow">
+        <i class="bi bi-capsule text-teal me-1"></i> Paracetamol
+      </a>
+      <a href="{{ url_for('user_bp.search_page', q='Cetirizine') }}" class="badge bg-white text-dark border shadow-sm px-3 py-2 rounded-pill text-decoration-none hover-shadow">
+        <i class="bi bi-capsule text-teal me-1"></i> Cetirizine
+      </a>
+      <a href="{{ url_for('user_bp.search_page', q='ORS') }}" class="badge bg-white text-dark border shadow-sm px-3 py-2 rounded-pill text-decoration-none hover-shadow">
+        <i class="bi bi-capsule text-teal me-1"></i> ORS
+      </a>
+      <a href="{{ url_for('user_bp.search_page', q='Amoxicillin') }}" class="badge bg-white text-dark border shadow-sm px-3 py-2 rounded-pill text-decoration-none hover-shadow">
+        <i class="bi bi-capsule text-teal me-1"></i> Amoxicillin
+      </a>
+    </div>
+  </div>
+
+  <!-- Search Results Listing (If user submits query) -->
+  {% if query is defined %}
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-10">
+        {% if message %}
+          <div class="card card-glass text-center p-5 mx-auto" style="max-width: 550px;">
+            <i class="bi bi-exclamation-octagon text-warning display-3 mb-3"></i>
+            <h3 class="fw-bold text-dark mb-2">{{ message }}</h3>
+            <p class="text-muted">We couldn't find any medicine matching "<strong>{{ query }}</strong>". Please check spelling or search by generic ingredient.</p>
+            <a href="{{ url_for('user_bp.landing') }}" class="btn btn-outline-custom rounded-pill mt-2 mx-auto" style="max-width: 200px;">Clear Search</a>
+          </div>
+        {% elif search_results %}
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold text-dark mb-0">Search Results for "{{ query }}"</h4>
+            <span class="badge bg-teal text-white rounded-pill px-3 py-2" style="background-color: #0d9488 !important;">Found {{ search_results|length }} result(s)</span>
+          </div>
+
+          <div class="row g-4">
+            {% for item in search_results %}
+              <div class="col-md-6">
+                <div class="card card-glass p-4 h-100 border-start border-4 border-teal">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                      <h4 class="fw-bold text-dark mb-1">{{ item.medicine.medicine_name }}</h4>
+                      {% if item.medicine.generic_name %}
+                        <span class="badge bg-light text-muted border"><i class="bi bi-prescription me-1"></i> {{ item.medicine.generic_name }}</span>
+                      {% endif %}
+                    </div>
+                    {% if item.lowest_price %}
+                      <div class="text-end">
+                        <div class="small text-muted">Lowest Price</div>
+                        <div class="fs-4 fw-bold text-success">₹{{ "%.2f"|format(item.lowest_price) }}</div>
+                      </div>
+                    {% else %}
+                      <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2">Out of Stock</span>
+                    {% endif %}
+                  </div>
+
+                  <p class="text-muted small mb-3">
+                    <strong>Category:</strong> {{ item.medicine.category or 'General' }}
+                    {% if item.medicine.uses %}<br><strong>Uses:</strong> {{ item.medicine.uses }}{% endif %}
+                  </p>
+
+                  <div class="pt-3 border-top mt-auto d-flex justify-content-between align-items-center">
+                    <span class="small text-muted">
+                      <i class="bi bi-shop me-1 text-teal"></i> Available at <strong>{{ item.available_count }}</strong> of {{ item.total_count }} shop(s)
+                    </span>
+                    <a href="{{ url_for('user_bp.medicine_detail', medicine_id=item.medicine.medicine_id) }}" class="btn btn-primary-custom btn-sm rounded-pill px-4 medicine-link">
+                      View Pharmacies & Prices <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Dual Entry Portal Cards (Preserving Phases 1-4) -->
+  <div class="row g-4 justify-content-center mt-3">
+    <!-- Customer Info Card -->
+    <div class="col-lg-6 col-md-10">
+      <div class="card card-glass entry-card border-top border-4 border-success">
+        <div>
+          <div class="icon-box icon-customer">
+            <i class="bi bi-person-heart"></i>
+          </div>
+          <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-2 rounded-pill mb-3">
+            <i class="bi bi-people-fill me-1"></i> For Patients & Customers
+          </span>
+          <h3 class="fw-bold mb-3 text-dark">Customer Medicine Assistance</h3>
+          <p class="text-muted leading-relaxed mb-4">
+            Directly search essential medicines, verify real-time stock at local rural pharmacies, and compare prices to get the lowest available price.
+          </p>
+          <ul class="list-unstyled text-muted mb-4">
+            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Voice-enabled & instant search</li>
+            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Geolocation-based distance calculation</li>
+            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Transparent price comparison</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pharmacy Admin Entry Card -->
+    <div class="col-lg-6 col-md-10">
+      <div class="card card-glass entry-card border-top border-4 border-teal">
+        <div>
+          <div class="icon-box icon-admin">
+            <i class="bi bi-building-add"></i>
+          </div>
+          <span class="badge bg-primary bg-opacity-10 text-teal fw-bold px-3 py-2 rounded-pill mb-3" style="color: #0d9488 !important;">
+            <i class="bi bi-shield-lock-fill me-1"></i> For Medical Shop Owners
+          </span>
+          <h3 class="fw-bold mb-3 text-dark">Pharmacy Admin Portal</h3>
+          <p class="text-muted leading-relaxed mb-4">
+            Manage your medical shop inventory, update medicine prices and stock levels, track expiry dates, and connect with rural patients.
+          </p>
+          <ul class="list-unstyled text-muted mb-4">
+            <li class="mb-2"><i class="bi bi-check-circle-fill text-teal me-2" style="color: #0d9488 !important;"></i> Digital inventory & stock control</li>
+            <li class="mb-2"><i class="bi bi-check-circle-fill text-teal me-2" style="color: #0d9488 !important;"></i> Multi-pharmacy ownership isolation</li>
+            <li class="mb-2"><i class="bi bi-check-circle-fill text-teal me-2" style="color: #0d9488 !important;"></i> Dynamic admin dashboard & profile</li>
+          </ul>
+        </div>
+        <div class="pt-3 border-top d-flex gap-2">
+          {% if session.get('admin_id') %}
+            <a href="{{ url_for('admin_bp.dashboard') }}" class="btn btn-primary-custom flex-grow-1 rounded-pill py-3 d-flex align-items-center justify-content-center gap-2">
+              <i class="bi bi-speedometer2"></i> Go to Admin Dashboard
+            </a>
+          {% else %}
+            <a href="{{ url_for('admin_bp.login') }}" class="btn btn-outline-custom flex-grow-1 rounded-pill py-3 d-flex align-items-center justify-content-center gap-2">
+              <i class="bi bi-box-arrow-in-right"></i> Admin Login
+            </a>
+            <a href="{{ url_for('admin_bp.register') }}" class="btn btn-primary-custom flex-grow-1 rounded-pill py-3 d-flex align-items-center justify-content-center gap-2">
+              <i class="bi bi-person-plus-fill"></i> Register Pharmacy
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/user_search.js') }}"></script>
+{% endblock %}

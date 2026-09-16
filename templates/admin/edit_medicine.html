@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Medicine — {{ inventory.medicine.medicine_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Navigation Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <a href="{{ url_for('admin_bp.medicines') }}" class="btn btn-sm btn-outline-secondary rounded-pill me-2">
+        <i class="bi bi-arrow-left"></i> Back to Inventory
+      </a>
+      <h2 class="fw-bold text-dark d-inline-block align-middle mb-0 ms-2">Edit {{ inventory.medicine.medicine_name }}</h2>
+    </div>
+    <a href="{{ url_for('admin_bp.dashboard') }}" class="btn btn-sm btn-outline-custom rounded-pill">
+      <i class="bi bi-speedometer2"></i> Dashboard
+    </a>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-9 col-md-11">
+      <div class="card card-glass p-4 p-md-5">
+
+        <form action="{{ url_for('admin_bp.edit_medicine', inventory_id=inventory.inventory_id) }}" method="POST" id="editMedicineForm">
+          <h5 class="fw-bold text-teal mb-3 border-bottom pb-2" style="color: #0d9488;"><i class="bi bi-capsule me-2"></i> Master Medicine Details</h5>
+          
+          <div class="row g-3 mb-4">
+            <!-- Medicine Name -->
+            <div class="col-md-6">
+              <label for="medicine_name" class="form-label fw-semibold">Medicine Brand Name <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-capsule"></i></span>
+                <input type="text" class="form-control" id="medicine_name" name="medicine_name" value="{{ inventory.medicine.medicine_name }}" required>
+              </div>
+            </div>
+
+            <!-- Generic Name -->
+            <div class="col-md-6">
+              <label for="generic_name" class="form-label fw-semibold">Generic Name / Active Ingredient</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-prescription"></i></span>
+                <input type="text" class="form-control" id="generic_name" name="generic_name" value="{{ inventory.medicine.generic_name or '' }}">
+              </div>
+            </div>
+
+            <!-- Category -->
+            <div class="col-md-6">
+              <label for="category" class="form-label fw-semibold">Category</label>
+              <select class="form-select" id="category" name="category">
+                <option value="">-- Select Category --</option>
+                <option value="Pain Relief / Analgesic" {% if inventory.medicine.category == 'Pain Relief / Analgesic' %}selected{% endif %}>Pain Relief / Analgesic</option>
+                <option value="Antibiotic / Anti-infective" {% if inventory.medicine.category == 'Antibiotic / Anti-infective' %}selected{% endif %}>Antibiotic / Anti-infective</option>
+                <option value="Antipyretic / Fever" {% if inventory.medicine.category == 'Antipyretic / Fever' %}selected{% endif %}>Antipyretic / Fever</option>
+                <option value="Vitamins & Supplements" {% if inventory.medicine.category == 'Vitamins & Supplements' %}selected{% endif %}>Vitamins & Supplements</option>
+                <option value="Antidiabetic" {% if inventory.medicine.category == 'Antidiabetic' %}selected{% endif %}>Antidiabetic</option>
+                <option value="Antihistamine / Allergy" {% if inventory.medicine.category == 'Antihistamine / Allergy' %}selected{% endif %}>Antihistamine / Allergy</option>
+                <option value="Cardiovascular / Blood Pressure" {% if inventory.medicine.category == 'Cardiovascular / Blood Pressure' %}selected{% endif %}>Cardiovascular / Blood Pressure</option>
+                <option value="Gastrointestinal" {% if inventory.medicine.category == 'Gastrointestinal' %}selected{% endif %}>Gastrointestinal</option>
+                <option value="First Aid & Topical" {% if inventory.medicine.category == 'First Aid & Topical' %}selected{% endif %}>First Aid & Topical</option>
+                <option value="General Healthcare" {% if inventory.medicine.category == 'General Healthcare' %}selected{% endif %}>General Healthcare</option>
+              </select>
+            </div>
+
+            <!-- Medicine Type -->
+            <div class="col-md-6">
+              <label for="medicine_type" class="form-label fw-semibold">Medicine Type</label>
+              <select class="form-select" id="medicine_type" name="medicine_type">
+                <option value="" {% if not inventory.medicine.medicine_type %}selected{% endif %}>-- Select Type --</option>
+                <option value="Tablet" {% if inventory.medicine.medicine_type == 'Tablet' %}selected{% endif %}>Tablet</option>
+                <option value="Syrup" {% if inventory.medicine.medicine_type == 'Syrup' %}selected{% endif %}>Syrup</option>
+                <option value="Ointment" {% if inventory.medicine.medicine_type == 'Ointment' %}selected{% endif %}>Ointment</option>
+                <option value="Cream" {% if inventory.medicine.medicine_type == 'Cream' %}selected{% endif %}>Cream</option>
+                <option value="Spray" {% if inventory.medicine.medicine_type == 'Spray' %}selected{% endif %}>Spray</option>
+                <option value="Inhaler" {% if inventory.medicine.medicine_type == 'Inhaler' %}selected{% endif %}>Inhaler</option>
+                <option value="Bandage" {% if inventory.medicine.medicine_type == 'Bandage' %}selected{% endif %}>Bandage</option>
+                <option value="Other" {% if inventory.medicine.medicine_type == 'Other' %}selected{% endif %}>Other</option>
+              </select>
+            </div>
+
+            <!-- Expiry Date -->
+            <div class="col-md-6">
+              <label for="expiry_date" class="form-label fw-semibold">Expiry Date</label>
+              <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-calendar-date"></i></span>
+                <input type="date" class="form-control" id="expiry_date" name="expiry_date" value="{{ inventory.expiry_date.strftime('%Y-%m-%d') if inventory.expiry_date else '' }}">
+              </div>
+            </div>
+
+            <!-- Uses -->
+            <div class="col-md-6">
+              <label for="uses" class="form-label fw-semibold">General Uses & Indications</label>
+              <textarea class="form-control" id="uses" name="uses" rows="2">{{ inventory.medicine.uses or '' }}</textarea>
+            </div>
+
+            <!-- Purpose -->
+            <div class="col-md-6">
+              <label for="purpose" class="form-label fw-semibold">Specific Purpose</label>
+              <textarea class="form-control" id="purpose" name="purpose" rows="2">{{ inventory.medicine.purpose or '' }}</textarea>
+            </div>
+
+            <!-- How to Use -->
+            <div class="col-md-6">
+              <label for="how_to_use" class="form-label fw-semibold">How to Take / Use</label>
+              <textarea class="form-control" id="how_to_use" name="how_to_use" rows="2">{{ inventory.medicine.how_to_use or '' }}</textarea>
+            </div>
+
+            <!-- Warnings -->
+            <div class="col-md-6">
+              <label for="warnings" class="form-label fw-semibold">Warnings & Side Effects</label>
+              <textarea class="form-control" id="warnings" name="warnings" rows="2">{{ inventory.medicine.warnings or '' }}</textarea>
+            </div>
+
+            <!-- Precautions -->
+            <div class="col-md-6">
+              <label for="precautions" class="form-label fw-semibold">Important Safety Precautions</label>
+              <textarea class="form-control" id="precautions" name="precautions" rows="2">{{ inventory.medicine.precautions or '' }}</textarea>
+            </div>
+          </div>
+
+          <h5 class="fw-bold text-teal mb-3 border-bottom pb-2" style="color: #0d9488;"><i class="bi bi-currency-rupee me-2"></i> Pharmacy Price & Stock Settings</h5>
+
+          <div class="row g-3 mb-4">
+            <!-- Price -->
+            <div class="col-md-6">
+              <label for="price" class="form-label fw-semibold">Unit Price (₹) <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-white fw-bold">₹</span>
+                <input type="number" step="0.01" min="0.01" class="form-control" id="price" name="price" value="{{ inventory.price }}" required>
+              </div>
+            </div>
+
+            <!-- Stock Quantity -->
+            <div class="col-md-6">
+              <label for="stock_quantity" class="form-label fw-semibold">Available Stock Quantity <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-boxes"></i></span>
+                <input type="number" min="0" class="form-control" id="stock_quantity" name="stock_quantity" value="{{ inventory.stock_quantity }}" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-top d-flex gap-2">
+            <button type="submit" class="btn btn-primary-custom flex-grow-1 py-3 rounded-pill fw-bold text-uppercase" style="letter-spacing: 0.5px;">
+              <i class="bi bi-check-circle-fill me-2"></i> Update Medicine Changes
+            </button>
+            <a href="{{ url_for('admin_bp.medicines') }}" class="btn btn-outline-secondary px-4 py-3 rounded-pill">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

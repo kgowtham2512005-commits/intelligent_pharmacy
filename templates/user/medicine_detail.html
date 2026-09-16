@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ medicine.medicine_name }} — Pharmacy Availability & Price Comparison{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Back Navigation -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <a href="{{ url_for('user_bp.landing') }}" class="btn btn-sm btn-outline-secondary rounded-pill">
+      <i class="bi bi-arrow-left"></i> Back to Search
+    </a>
+    <span id="locationStatusBadge" class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary px-3 py-2 rounded-pill">
+      <i class="bi bi-geo-alt me-1"></i> Checking location access...
+    </span>
+  </div>
+
+  <!-- Medicine Detail Header Card (Phase 12) -->
+  <div class="card card-glass p-4 p-md-5 mb-4 border-top border-4 border-teal" style="border-color: #0d9488 !important;">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <div class="d-flex align-items-center gap-3 mb-2">
+          <div class="brand-icon bg-white text-teal fs-3" style="width: 54px; height: 54px; border-radius: 16px;">
+            <i class="bi bi-capsule"></i>
+          </div>
+          <div>
+            <h1 class="fw-bold mb-0 text-dark display-6">{{ medicine.medicine_name }}</h1>
+            {% if medicine.generic_name %}
+              <div class="fs-5 text-muted fw-semibold mb-1">
+                <i class="bi bi-prescription me-1"></i> Generic Name: <span class="text-teal" style="color: #0d9488;">{{ medicine.generic_name }}</span>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <span class="badge bg-light text-dark border me-2"><i class="bi bi-tag me-1"></i> {{ medicine.category or 'General Medicine' }}</span>
+        </div>
+
+        {% if medicine.uses %}
+          <div class="mt-3">
+            <strong class="text-dark"><i class="bi bi-heart-pulse me-1 text-teal"></i> What is this medicine used for?</strong>
+            <p class="text-muted mb-0 mt-1 leading-relaxed">{{ medicine.uses }}</p>
+          </div>
+        {% endif %}
+
+        <div class="mt-3">
+          <strong class="text-dark"><i class="bi bi-bullseye me-1 text-teal"></i> Purpose:</strong>
+          <p class="text-muted mb-0 mt-1 leading-relaxed">
+            {% if medicine.purpose %}
+              {{ medicine.purpose }}
+            {% elif medicine.uses %}
+              {{ medicine.uses }}
+            {% else %}
+              Provides relief or treatment associated with {{ medicine.category or 'general healthcare' }}.
+            {% endif %}
+          </p>
+        </div>
+
+        <div class="mt-3">
+          <strong class="text-dark"><i class="bi bi-info-circle me-1 text-teal"></i> How to take:</strong>
+          <p class="text-muted mb-0 mt-1 leading-relaxed">
+            {% if medicine.how_to_use %}
+              {{ medicine.how_to_use }}
+            {% else %}
+              {% if medicine.medicine_type == 'Tablet' %}
+                Take the medicine only according to the instructions on the medicine package or as advised by a doctor/pharmacist. Swallow the tablet with water unless the product label gives different instructions. Do not take more than the recommended amount. Do not use the medicine more frequently than instructed.
+              {% elif medicine.medicine_type == 'Syrup' %}
+                Follow the measuring instructions on the product label. Use the supplied measuring cup/spoon if provided. Follow the doctor/pharmacist's instructions.
+              {% elif medicine.medicine_type == 'Ointment' or medicine.medicine_type == 'Cream' %}
+                Apply only as directed on the product label or by a healthcare professional. Avoid contact with eyes unless specifically intended for the eyes.
+              {% elif medicine.medicine_type == 'Spray' %}
+                Use according to the product label. Do not exceed the recommended frequency.
+              {% elif medicine.medicine_type == 'Inhaler' %}
+                Use according to the inhaler's instructions and the instructions provided by the doctor/pharmacist.
+              {% elif medicine.medicine_type == 'Bandage' %}
+                Clean and dry the affected area as appropriate, then apply the bandage according to its product instructions.
+              {% else %}
+                Please follow the product label instructions or consult a doctor/pharmacist for safe usage.
+              {% endif %}
+            {% endif %}
+          </p>
+        </div>
+
+        <div class="mt-3 small">
+          <strong class="text-dark"><i class="bi bi-shield-exclamation me-1 text-danger"></i> Important Safety Information:</strong>
+          <ul class="mb-0 mt-1 ps-3 text-muted">
+            <li>Always read the medicine label before use.</li>
+            <li>Follow the instructions provided by a doctor or licensed pharmacist.</li>
+            <li>Do not exceed the recommended amount.</li>
+            <li>Check the ingredients if you have known allergies.</li>
+            <li>If you are unsure how to use the medicine, ask a doctor or pharmacist.</li>
+            <li>Seek professional medical advice if symptoms persist or worsen.</li>
+            {% if medicine.precautions %}
+              <li><strong class="text-danger">Precautions:</strong> <span class="text-danger">{{ medicine.precautions }}</span></li>
+            {% endif %}
+            {% if medicine.warnings %}
+              <li><strong class="text-danger">Warnings:</strong> <span class="text-danger">{{ medicine.warnings }}</span></li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+
+      <!-- Lowest Available Price Highlight Banner (Phase 12 Requirement) -->
+      <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+        {% if lowest_available_price %}
+          <div class="card bg-success bg-opacity-10 border border-success p-4 rounded-4 text-center text-lg-end shadow-sm">
+            <div class="text-success small fw-bold text-uppercase" style="letter-spacing: 0.5px;">
+              <i class="bi bi-tag-fill me-1"></i> Lowest Available Price
+            </div>
+            <div class="display-5 fw-extrabold text-success mt-1">₹{{ "%.2f"|format(lowest_available_price) }}</div>
+            <div class="small text-muted mt-1">Only compared across available stock</div>
+          </div>
+        {% else %}
+          <div class="card bg-danger bg-opacity-10 border border-danger p-4 rounded-4 text-center text-lg-end shadow-sm">
+            <div class="text-danger small fw-bold text-uppercase">Stock Alert</div>
+            <div class="fs-4 fw-bold text-danger mt-1">Out of Stock Everywhere</div>
+            <div class="small text-muted mt-1">No nearby pharmacy currently has active stock.</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Price Comparison & Nearby Pharmacies Section (Phases 11 & 12) -->
+  <div class="card card-glass p-4 mb-4">
+    <!-- Header Controls & Sorting -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 border-bottom pb-3">
+      <div>
+        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-shop me-2 text-teal"></i> Nearby Pharmacies & Price Comparison</h3>
+        <p class="text-muted small mb-0">Showing {{ pharmacies|length }} registered pharmacy options for {{ medicine.medicine_name }}.</p>
+      </div>
+
+      <!-- Sorting Options -->
+      <div class="d-flex align-items-center gap-2">
+        <span class="small text-muted fw-bold me-1">Sort by:</span>
+        <div class="btn-group" role="group">
+          <a href="{{ url_for('user_bp.medicine_detail', medicine_id=medicine.medicine_id, sort='price', lat=user_lat, lng=user_lng) }}" 
+             class="btn btn-sm {% if sort_by == 'price' %}btn-teal text-white{% else %}btn-outline-secondary{% endif %} rounded-start-pill px-3" style="{% if sort_by == 'price' %}background-color: #0d9488 !important;{% endif %}">
+            <i class="bi bi-sort-numeric-down me-1"></i> Lowest Price
+          </a>
+          <a href="{{ url_for('user_bp.medicine_detail', medicine_id=medicine.medicine_id, sort='distance', lat=user_lat, lng=user_lng) }}" 
+             class="btn btn-sm {% if sort_by == 'distance' %}btn-teal text-white{% else %}btn-outline-secondary{% endif %} px-3" style="{% if sort_by == 'distance' %}background-color: #0d9488 !important;{% endif %}">
+            <i class="bi bi-geo-alt me-1"></i> Nearest Pharmacy
+          </a>
+          <a href="{{ url_for('user_bp.medicine_detail', medicine_id=medicine.medicine_id, sort='stock', lat=user_lat, lng=user_lng) }}" 
+             class="btn btn-sm {% if sort_by == 'stock' %}btn-teal text-white{% else %}btn-outline-secondary{% endif %} rounded-end-pill px-3" style="{% if sort_by == 'stock' %}background-color: #0d9488 !important;{% endif %}">
+            <i class="bi bi-boxes me-1"></i> Availability
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pharmacy List as Comparison Table -->
+    {% if pharmacies %}
+      <div class="table-responsive rounded-3 shadow-sm border border-light-subtle mb-3">
+        <table class="table table-hover table-borderless align-middle mb-0 bg-white">
+          <thead class="table-light border-bottom text-muted small text-uppercase" style="letter-spacing: 0.5px;">
+            <tr>
+              <th scope="col" class="py-3 ps-4">Pharmacy</th>
+              <th scope="col" class="py-3">Distance</th>
+              <th scope="col" class="py-3">Price</th>
+              <th scope="col" class="py-3">Availability</th>
+              <th scope="col" class="py-3">Stock</th>
+              <th scope="col" class="py-3 pe-4 text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody class="border-top-0">
+            {% for p in pharmacies %}
+              <tr class="{% if p.price == lowest_available_price and p.is_available %}table-success bg-opacity-10 border-success border-start border-4{% else %}border-bottom{% endif %}">
+                <td class="py-3 ps-4">
+                  <div class="d-flex align-items-center gap-2">
+                    {% if p.price == lowest_available_price and p.is_available %}
+                      <i class="bi bi-award-fill text-success fs-5" title="Lowest Price"></i>
+                    {% else %}
+                      <i class="bi bi-shop text-secondary fs-5"></i>
+                    {% endif %}
+                    <div>
+                      <h6 class="mb-0 fw-bold text-dark">{{ p.shop_name }}</h6>
+                      <small class="text-muted d-block" style="font-size: 0.8rem;"><i class="bi bi-geo-alt me-1"></i>{{ p.address }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3">
+                  {% if p.distance is not none %}
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle rounded-pill px-2 py-1">
+                      <i class="bi bi-geo-alt-fill me-1"></i> {{ p.distance }} km
+                    </span>
+                  {% else %}
+                    <span class="text-muted small">-</span>
+                  {% endif %}
+                </td>
+                <td class="py-3">
+                  <span class="fw-bold {% if p.is_available %}text-success{% else %}text-muted{% endif %} fs-6">
+                    ₹{{ "%.2f"|format(p.price) }}
+                  </span>
+                </td>
+                <td class="py-3">
+                  {% if p.is_available %}
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill px-2 py-1">
+                      <i class="bi bi-check-circle-fill me-1"></i> Available
+                    </span>
+                  {% else %}
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle rounded-pill px-2 py-1">
+                      <i class="bi bi-x-circle-fill me-1"></i> Out of Stock
+                    </span>
+                  {% endif %}
+                </td>
+                <td class="py-3">
+                  <span class="text-dark fw-medium">{{ p.stock_quantity }} units</span>
+                </td>
+                <td class="py-3 pe-4 text-end">
+                  <a href="tel:{{ p.phone }}" class="btn btn-sm btn-outline-teal rounded-pill px-3" style="border-color: #0d9488; color: #0d9488;">
+                    <i class="bi bi-telephone-fill me-1"></i> Call
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="text-muted small">
+        <i class="bi bi-info-circle me-1"></i> <strong>Note:</strong> Only active stock is shown. For detailed inquiries, please call the pharmacy directly.
+      </div>
+    {% else %}
+      <div class="text-center py-5 text-muted bg-light rounded-4">
+        <i class="bi bi-shop-window display-4 d-block mb-3 opacity-50"></i>
+        <h5>No registered pharmacies currently stock {{ medicine.medicine_name }}</h5>
+        <p class="small mb-0">Check back later or search for generic alternatives.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/user_search.js') }}"></script>
+{% endblock %}

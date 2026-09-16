@@ -1,0 +1,121 @@
+medicine_id	medicine_name	item_type	pharmacy_name	pharmacy_address	distance_km_from_malumichampatti	price_inr	availability	stock_quantity
+1	Dolo 650 Tablet	Tablet	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8	14.01	Available	35
+1	Dolo 650 Tablet	Tablet	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7		Unavailable	0
+1	Dolo 650 Tablet	Tablet	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1		Unavailable	0
+1	Dolo 650 Tablet	Tablet	Annai Medical Centre	Podanur side, Coimbatore	4.6	10	Available	56
+1	Dolo 650 Tablet	Tablet	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8		Unavailable	0
+1	Dolo 650 Tablet	Tablet	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9	10	Available	54
+2	Paracetamol 500 mg Tablet	Tablet	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8	10	Available	63
+2	Paracetamol 500 mg Tablet	Tablet	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7		Unavailable	0
+2	Paracetamol 500 mg Tablet	Tablet	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1		Unavailable	0
+2	Paracetamol 500 mg Tablet	Tablet	Annai Medical Centre	Podanur side, Coimbatore	4.6	10	Available	67
+2	Paracetamol 500 mg Tablet	Tablet	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8	10	Available	32
+2	Paracetamol 500 mg Tablet	Tablet	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9	10	Available	74
+3	Calpol 650 Tablet	Tablet	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8	17.06	Available	12
+3	Calpol 650 Tablet	Tablet	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7	10	Available	69
+3	Calpol 650 Tablet	Tablet	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1	10	Available	70
+3	Calpol 650 Tablet	Tablet	Annai Medical Centre	Podanur side, Coimbatore	4.6		Unavailable	0
+3	Calpol 650 Tablet	Tablet	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8	13.05	Available	13
+3	Calpol 650 Tablet	Tablet	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9		Unavailable	0
+4	Ibuprofen 400 mg Tablet	Tablet	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8		Unavailable	0
+4	Ibuprofen 400 mg Tablet	Tablet	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7	10	Available	77
+4	Ibuprofen 400 mg Tablet	Tablet	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1		Unavailable	0
+4	Ibuprofen 400 mg Tablet	Tablet	Annai Medical Centre	Podanur side, Coimbatore	4.6	10.76	Available	15
+4	Ibuprofen 400 mg Tablet	Tablet	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8		Unavailable	0
+4	Ibuprofen 400 mg Tablet	Tablet	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9	10	Available	45
+5	Aspirin 75 mg Tablet	Tablet	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8	10.23	Available	45
+5	Aspirin 75 mg Tablet	Tablet	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7	20	Available	21
+5	Aspirin 75 mg Tablet	Tablet	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1	20	Available	14
+5	Aspirin 75 mg Tablet	Tablet	Annai Medical Centre	Podanur side, Coimbatore	4.6	10	Available	77
+5	Aspirin 75 mg Tablet	Tablet	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8		Unavailable	0
+5	Aspirin 75 mg Tablet	Tablet	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9		Unavailable	0
+6	Cetirizine 10 mg Tablet	Tablet	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8	11.17	Available	38
+6	Cetirizine 10 mg Tablet	Tablet	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7		Unavailable	0
+6	Cetirizine 10 mg Tablet	Tablet	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1	14.09	Available	36
+6	Cetirizine 10 mg Tablet	Tablet	Annai Medical Centre	Podanur side, Coimbatore	4.6		Unavailable	0
+6	Cetirizine 10 mg Tablet	Tablet	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8	10	Available	74
+6	Cetirizine 10 mg Tablet	Tablet	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9	10	Available	72
+7	Levocetirizine 5 mg Tablet	Tablet	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8	10	Available	75
+7	Levocetirizine 5 mg Tablet	Tablet	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7	20	Available	18
+7	Levocetirizine 5 mg Tablet	Tablet	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1	20	Available	18
+7	Levocetirizine 5 mg Tablet	Tablet	Annai Medical Centre	Podanur side, Coimbatore	4.6	13.37	Available	41
+7	Levocetirizine 5 mg Tablet	Tablet	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8	20	Available	31
+7	Levocetirizine 5 mg Tablet	Tablet	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9		Unavailable	0
+8	Loratadine 10 mg Tablet	Tablet	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8		Unavailable	0
+8	Loratadine 10 mg Tablet	Tablet	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7	10	Available	11
+8	Loratadine 10 mg Tablet	Tablet	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1		Unavailable	0
+8	Loratadine 10 mg Tablet	Tablet	Annai Medical Centre	Podanur side, Coimbatore	4.6	10	Available	10
+8	Loratadine 10 mg Tablet	Tablet	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8		Unavailable	0
+8	Loratadine 10 mg Tablet	Tablet	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9	10	Available	38
+9	Fexofenadine 120 mg Tablet	Tablet	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8	10	Available	75
+9	Fexofenadine 120 mg Tablet	Tablet	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7	15.51	Available	19
+9	Fexofenadine 120 mg Tablet	Tablet	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1	13.53	Available	24
+9	Fexofenadine 120 mg Tablet	Tablet	Annai Medical Centre	Podanur side, Coimbatore	4.6	10	Available	52
+9	Fexofenadine 120 mg Tablet	Tablet	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8	10	Available	60
+9	Fexofenadine 120 mg Tablet	Tablet	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9	10	Available	51
+10	Montelukast 10 mg Tablet	Tablet	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8	10	Available	31
+10	Montelukast 10 mg Tablet	Tablet	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7		Unavailable	0
+10	Montelukast 10 mg Tablet	Tablet	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1	10	Available	76
+10	Montelukast 10 mg Tablet	Tablet	Annai Medical Centre	Podanur side, Coimbatore	4.6		Unavailable	0
+10	Montelukast 10 mg Tablet	Tablet	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8	10	Available	35
+10	Montelukast 10 mg Tablet	Tablet	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9		Unavailable	0
+11	Omeprazole 20 mg Capsule	Capsule	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8		Unavailable	0
+11	Omeprazole 20 mg Capsule	Capsule	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7	134.56	Available	47
+11	Omeprazole 20 mg Capsule	Capsule	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1	166.86	Available	36
+11	Omeprazole 20 mg Capsule	Capsule	Annai Medical Centre	Podanur side, Coimbatore	4.6	140.15	Available	18
+11	Omeprazole 20 mg Capsule	Capsule	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8	169.77	Available	65
+11	Omeprazole 20 mg Capsule	Capsule	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9	141.82	Available	63
+12	Pantoprazole 40 mg Tablet	Tablet	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8	10	Available	34
+12	Pantoprazole 40 mg Tablet	Tablet	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7	10.39	Available	29
+12	Pantoprazole 40 mg Tablet	Tablet	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1		Unavailable	0
+12	Pantoprazole 40 mg Tablet	Tablet	Annai Medical Centre	Podanur side, Coimbatore	4.6	20	Available	13
+12	Pantoprazole 40 mg Tablet	Tablet	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8		Unavailable	0
+12	Pantoprazole 40 mg Tablet	Tablet	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9	10	Available	56
+13	Rabeprazole 20 mg Tablet	Tablet	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8	10	Available	8
+13	Rabeprazole 20 mg Tablet	Tablet	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7		Unavailable	0
+13	Rabeprazole 20 mg Tablet	Tablet	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1	10	Available	38
+13	Rabeprazole 20 mg Tablet	Tablet	Annai Medical Centre	Podanur side, Coimbatore	4.6	10	Available	60
+13	Rabeprazole 20 mg Tablet	Tablet	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8	10	Available	45
+13	Rabeprazole 20 mg Tablet	Tablet	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9	10	Available	70
+14	Famotidine 20 mg Tablet	Tablet	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8	10	Available	78
+14	Famotidine 20 mg Tablet	Tablet	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7	10	Available	60
+14	Famotidine 20 mg Tablet	Tablet	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1	10	Available	73
+14	Famotidine 20 mg Tablet	Tablet	Annai Medical Centre	Podanur side, Coimbatore	4.6		Unavailable	0
+14	Famotidine 20 mg Tablet	Tablet	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8	10	Available	47
+14	Famotidine 20 mg Tablet	Tablet	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9		Unavailable	0
+15	Domperidone 10 mg Tablet	Tablet	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8		Unavailable	0
+15	Domperidone 10 mg Tablet	Tablet	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7	10	Available	57
+15	Domperidone 10 mg Tablet	Tablet	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1		Unavailable	0
+15	Domperidone 10 mg Tablet	Tablet	Annai Medical Centre	Podanur side, Coimbatore	4.6	10	Available	75
+15	Domperidone 10 mg Tablet	Tablet	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8	10	Available	53
+15	Domperidone 10 mg Tablet	Tablet	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9	10.6	Available	43
+16	Ondansetron 4 mg Tablet	Tablet	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8	20	Available	5
+16	Ondansetron 4 mg Tablet	Tablet	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7	10	Available	60
+16	Ondansetron 4 mg Tablet	Tablet	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1	10	Available	46
+16	Ondansetron 4 mg Tablet	Tablet	Annai Medical Centre	Podanur side, Coimbatore	4.6	11.45	Available	32
+16	Ondansetron 4 mg Tablet	Tablet	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8		Unavailable	0
+16	Ondansetron 4 mg Tablet	Tablet	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9	15.45	Available	26
+17	ORS Lemon Sachet	Sachet	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8		Unavailable	0
+17	ORS Lemon Sachet	Sachet	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7		Unavailable	0
+17	ORS Lemon Sachet	Sachet	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1	162.36	Available	47
+17	ORS Lemon Sachet	Sachet	Annai Medical Centre	Podanur side, Coimbatore	4.6		Unavailable	0
+17	ORS Lemon Sachet	Sachet	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8	162.73	Available	33
+17	ORS Lemon Sachet	Sachet	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9	140.74	Available	10
+18	Antacid Gel Syrup	Syrup	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8	454.11	Available	14
+18	Antacid Gel Syrup	Syrup	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7		Unavailable	0
+18	Antacid Gel Syrup	Syrup	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1	443.53	Available	78
+18	Antacid Gel Syrup	Syrup	Annai Medical Centre	Podanur side, Coimbatore	4.6	425.38	Available	54
+18	Antacid Gel Syrup	Syrup	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8	390.91	Available	23
+18	Antacid Gel Syrup	Syrup	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9		Unavailable	0
+19	Lactulose Syrup	Syrup	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8		Unavailable	0
+19	Lactulose Syrup	Syrup	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7	507.22	Available	71
+19	Lactulose Syrup	Syrup	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1		Unavailable	0
+19	Lactulose Syrup	Syrup	Annai Medical Centre	Podanur side, Coimbatore	4.6	557.24	Available	20
+19	Lactulose Syrup	Syrup	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8		Unavailable	0
+19	Lactulose Syrup	Syrup	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9	593.29	Available	72
+20	Isabgol Powder	Powder	Malumichampatti Care Pharmacy	Malumichampatti, Coimbatore	0.8	12.98	Available	61
+20	Isabgol Powder	Powder	Sri Lakshmi Medicals	Near Malumichampatti, Coimbatore	1.7	12.41	Available	75
+20	Isabgol Powder	Powder	Kovai Health Pharmacy	Eachanari side, Coimbatore	3.1	14.01	Available	65
+20	Isabgol Powder	Powder	Annai Medical Centre	Podanur side, Coimbatore	4.6		Unavailable	0
+20	Isabgol Powder	Powder	RuralCare Medicals	Kurumbapalayam side, Coimbatore	6.8	13.51	Available	40
+20	Isabgol Powder	Powder	Sri Vinayaga Pharmacy	Kovaipudur side, Coimbatore	8.9	12.6	Available	35
