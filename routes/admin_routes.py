@@ -312,6 +312,7 @@ def medicines():
     )
 
 @admin_bp.route('/medicines/add', methods=['GET', 'POST'])
+@admin_bp.route('/add_medicine', methods=['GET', 'POST'])
 @admin_required
 def add_medicine():
     """Add Medicine to Pharmacy Inventory with Master Medicine Deduplication."""
