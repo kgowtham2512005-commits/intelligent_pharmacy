@@ -1,0 +1,403 @@
+{% extends 'base.html' %}
+
+{% block title %}Master Admin Portal — Overall System Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-lg-5">
+
+  <!-- Master Admin Header Banner -->
+  <div class="card card-glass p-4 p-md-5 mb-4 border-top border-4 border-teal bg-gradient" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border-color: #0d9488 !important;">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <div class="d-flex align-items-center gap-3 mb-2">
+          <div class="brand-icon bg-teal text-white fs-3" style="width: 52px; height: 52px; border-radius: 16px; background-color: #0d9488;">
+            <i class="bi bi-shield-lock-fill"></i>
+          </div>
+          <div>
+            <h2 class="fw-bold mb-0 text-white">Master Administration Portal</h2>
+            <p class="text-light opacity-75 mb-0">System-wide control across all registered pharmacies, users, medicines, and inventory.</p>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex gap-2 align-items-center">
+        <a href="{{ url_for('admin_bp.dashboard') }}" class="btn btn-outline-light rounded-pill px-3">
+          <i class="bi bi-arrow-left me-1"></i> My Pharmacy Dashboard
+        </a>
+        <a href="{{ url_for('admin_bp.logout') }}" class="btn btn-danger rounded-pill px-3">
+          <i class="bi bi-box-arrow-right me-1"></i> Logout
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- System-wide Dynamic KPI Stats Grid -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3 col-sm-6">
+      <div class="stat-card border-start border-4 border-primary">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small fw-semibold">Total Pharmacies</div>
+            <div class="fs-3 fw-bold text-primary mt-1">{{ total_pharmacies }}</div>
+          </div>
+          <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+            <i class="bi bi-shop"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+      <div class="stat-card border-start border-4 border-success">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small fw-semibold">Global Medicine Catalog</div>
+            <div class="fs-3 fw-bold text-success mt-1">{{ total_medicines }}</div>
+          </div>
+          <div class="stat-icon bg-success bg-opacity-10 text-success">
+            <i class="bi bi-capsule"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+      <div class="stat-card border-start border-4 border-info">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small fw-semibold">Total Stock Units</div>
+            <div class="fs-3 fw-bold text-info mt-1">{{ total_stock_units }}</div>
+          </div>
+          <div class="stat-icon bg-info bg-opacity-10 text-info">
+            <i class="bi bi-boxes"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6">
+      <div class="stat-card border-start border-4 border-warning">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small fw-semibold">Total Inventory Value</div>
+            <div class="fs-3 fw-bold text-warning mt-1">₹{{ "%.2f"|format(total_inventory_value) }}</div>
+          </div>
+          <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+            <i class="bi bi-currency-rupee"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Master Tabs Navigation -->
+  <div class="card card-glass p-3 mb-4">
+    <ul class="nav nav-pills nav-fill gap-2" id="masterTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active rounded-pill fw-semibold py-2" id="pharmacies-tab" data-bs-toggle="tab" data-bs-target="#tab-pharmacies" type="button" role="tab">
+          <i class="bi bi-shop me-2"></i> All Pharmacies ({{ pharmacies|length }})
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link rounded-pill fw-semibold py-2" id="medicines-tab" data-bs-toggle="tab" data-bs-target="#tab-medicines" type="button" role="tab">
+          <i class="bi bi-capsule me-2"></i> Master Medicine Catalog ({{ medicines|length }})
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link rounded-pill fw-semibold py-2" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#tab-inventory" type="button" role="tab">
+          <i class="bi bi-box-seam me-2"></i> Cross-Pharmacy Inventory ({{ inventories|length }})
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link rounded-pill fw-semibold py-2" id="admins-tab" data-bs-toggle="tab" data-bs-target="#tab-admins" type="button" role="tab">
+          <i class="bi bi-people-fill me-2"></i> Admin Accounts ({{ admins|length }})
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Tab Contents -->
+  <div class="tab-content" id="masterTabContent">
+
+    <!-- ── TAB 1: ALL PHARMACIES ────────────────────────────────────────── -->
+    <div class="tab-pane fade show active" id="tab-pharmacies" role="tabpanel">
+      <div class="card card-glass p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom">
+          <div>
+            <h4 class="fw-bold text-dark mb-1"><i class="bi bi-shop text-teal me-2"></i> Registered Pharmacies Management</h4>
+            <p class="text-muted small mb-0">View and edit contact details, locations, and inventory counts for every registered store.</p>
+          </div>
+          <a href="{{ url_for('admin_bp.register') }}" class="btn btn-teal text-white rounded-pill px-4 shadow-sm" style="background-color: #0d9488;">
+            <i class="bi bi-plus-circle me-1"></i> Register New Pharmacy
+          </a>
+        </div>
+
+        <div class="table-responsive rounded-3 border">
+          <table class="table table-hover align-middle mb-0 bg-white">
+            <thead class="table-light text-muted small text-uppercase">
+              <tr>
+                <th class="py-3 ps-4">ID</th>
+                <th class="py-3">Pharmacy & Owner</th>
+                <th class="py-3">Contact & Address</th>
+                <th class="py-3">Coordinates / Dist</th>
+                <th class="py-3">Stocked Items</th>
+                <th class="py-3 pe-4 text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in pharmacies %}
+                <tr>
+                  <td class="ps-4 fw-bold text-muted">#{{ p.pharmacy_id }}</td>
+                  <td>
+                    <h6 class="mb-0 fw-bold text-dark">{{ p.shop_name }}</h6>
+                    <small class="text-muted"><i class="bi bi-person me-1"></i> Owner: <strong>{{ p.owner_name }}</strong></small>
+                    <div class="text-muted small" style="font-size: 0.78rem;">Username: <code>{{ p.admin.username if p.admin else 'N/A' }}</code></div>
+                  </td>
+                  <td>
+                    <div class="text-dark"><i class="bi bi-telephone text-success me-1"></i> {{ p.phone }}</div>
+                    <small class="text-muted d-block text-truncate" style="max-width: 250px;" title="{{ p.address }}">
+                      <i class="bi bi-geo-alt text-danger me-1"></i> {{ p.address }}
+                    </small>
+                  </td>
+                  <td>
+                    {% if p.distance_km is not none %}
+                      <span class="badge bg-primary bg-opacity-10 text-primary border rounded-pill">{{ p.distance_km }} km</span>
+                    {% else %}
+                      <span class="text-muted small">Lat: {{ p.latitude or '-' }}, Lng: {{ p.longitude or '-' }}</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-bold">
+                      <i class="bi bi-box-seam me-1 text-teal"></i> {{ p.inventory_items|length }} medicines
+                    </span>
+                  </td>
+                  <td class="pe-4 text-end">
+                    <div class="btn-group">
+                      <a href="{{ url_for('admin_bp.master_edit_pharmacy', pharmacy_id=p.pharmacy_id) }}" class="btn btn-sm btn-outline-primary rounded-pill me-1" title="Edit Pharmacy">
+                        <i class="bi bi-pencil-square me-1"></i> Edit
+                      </a>
+                      <form action="{{ url_for('admin_bp.master_delete_pharmacy', pharmacy_id=p.pharmacy_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete {{ p.shop_name }}? All its inventory will be deleted!');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" title="Delete Pharmacy">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB 2: MASTER MEDICINE CATALOG ──────────────────────────────── -->
+    <div class="tab-pane fade" id="tab-medicines" role="tabpanel">
+      <div class="card card-glass p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom">
+          <div>
+            <h4 class="fw-bold text-dark mb-1"><i class="bi bi-capsule text-teal me-2"></i> Global Medicine Catalog</h4>
+            <p class="text-muted small mb-0">Manage global medical names, generic formulas, categories, precautions, and uses.</p>
+          </div>
+          <a href="{{ url_for('admin_bp.add_medicine') }}" class="btn btn-teal text-white rounded-pill px-4 shadow-sm" style="background-color: #0d9488;">
+            <i class="bi bi-plus-circle me-1"></i> Add New Medicine
+          </a>
+        </div>
+
+        <div class="table-responsive rounded-3 border">
+          <table class="table table-hover align-middle mb-0 bg-white">
+            <thead class="table-light text-muted small text-uppercase">
+              <tr>
+                <th class="py-3 ps-4">ID</th>
+                <th class="py-3">Medicine Name</th>
+                <th class="py-3">Generic Salt</th>
+                <th class="py-3">Category / Type</th>
+                <th class="py-3">Uses & Purpose</th>
+                <th class="py-3">Stores Stocking</th>
+                <th class="py-3 pe-4 text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for m in medicines %}
+                <tr>
+                  <td class="ps-4 fw-bold text-muted">#{{ m.medicine_id }}</td>
+                  <td>
+                    <strong class="text-dark fs-6">{{ m.medicine_name }}</strong>
+                    {% if m.medicine_type %}
+                      <span class="badge bg-light text-secondary border ms-1">{{ m.medicine_type }}</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if m.generic_name %}
+                      <span class="text-teal fw-medium" style="color: #0d9488;"><i class="bi bi-prescription me-1"></i>{{ m.generic_name }}</span>
+                    {% else %}
+                      <span class="text-muted small">—</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle rounded-pill">
+                      {{ m.category or 'General' }}
+                    </span>
+                  </td>
+                  <td>
+                    <small class="text-muted d-block text-truncate" style="max-width: 250px;" title="{{ m.uses or m.purpose }}">
+                      {{ m.uses or m.purpose or 'General usage' }}
+                    </small>
+                  </td>
+                  <td>
+                    <span class="badge bg-light text-dark border px-2 py-1 rounded-pill">
+                      {{ m.inventory_items|length }} stores
+                    </span>
+                  </td>
+                  <td class="pe-4 text-end">
+                    <div class="btn-group">
+                      <a href="{{ url_for('admin_bp.master_edit_medicine', medicine_id=m.medicine_id) }}" class="btn btn-sm btn-outline-primary rounded-pill me-1" title="Edit Medicine Data">
+                        <i class="bi bi-pencil-square me-1"></i> Edit
+                      </a>
+                      <a href="{{ url_for('user_bp.medicine_detail', medicine_id=m.medicine_id) }}" target="_blank" class="btn btn-sm btn-outline-teal rounded-pill me-1" style="border-color: #0d9488; color: #0d9488;" title="View Live Page">
+                        <i class="bi bi-eye"></i>
+                      </a>
+                      <form action="{{ url_for('admin_bp.master_delete_medicine', medicine_id=m.medicine_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete {{ m.medicine_name }} permanently from global catalog?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" title="Delete Medicine">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB 3: CROSS-PHARMACY INVENTORY MASTER ─────────────────────── -->
+    <div class="tab-pane fade" id="tab-inventory" role="tabpanel">
+      <div class="card card-glass p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom">
+          <div>
+            <h4 class="fw-bold text-dark mb-1"><i class="bi bi-box-seam text-teal me-2"></i> Cross-Pharmacy Inventory Control</h4>
+            <p class="text-muted small mb-0">Direct master control over prices, stock counts, and status across all pharmacy inventories.</p>
+          </div>
+        </div>
+
+        <div class="table-responsive rounded-3 border">
+          <table class="table table-hover align-middle mb-0 bg-white">
+            <thead class="table-light text-muted small text-uppercase">
+              <tr>
+                <th class="py-3 ps-4">Pharmacy</th>
+                <th class="py-3">Medicine</th>
+                <th class="py-3">Price (₹)</th>
+                <th class="py-3">Stock Units</th>
+                <th class="py-3">Expiry Date</th>
+                <th class="py-3">Status</th>
+                <th class="py-3 pe-4 text-end">Quick Update</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for inv in inventories %}
+                <tr>
+                  <td class="ps-4">
+                    <strong class="text-dark">{{ inv.pharmacy.shop_name }}</strong>
+                    <div class="small text-muted"><i class="bi bi-telephone me-1"></i>{{ inv.pharmacy.phone }}</div>
+                  </td>
+                  <td>
+                    <strong class="text-dark">{{ inv.medicine.medicine_name }}</strong>
+                    <div class="small text-muted">{{ inv.medicine.category or 'General' }}</div>
+                  </td>
+                  <td>
+                    <form action="{{ url_for('admin_bp.master_quick_update_inventory', inventory_id=inv.inventory_id) }}" method="POST" class="d-flex align-items-center gap-1">
+                      <input type="number" step="0.01" min="0.01" name="price" value="{{ inv.price }}" class="form-control form-control-sm text-end" style="width: 85px;" required>
+                  </td>
+                  <td>
+                      <input type="number" min="0" name="stock_quantity" value="{{ inv.stock_quantity }}" class="form-control form-control-sm text-end" style="width: 75px;" required>
+                  </td>
+                  <td>
+                    <span class="small {% if inv.is_expired %}text-danger fw-bold{% else %}text-muted{% endif %}">
+                      {{ inv.expiry_date.strftime('%Y-%m-%d') if inv.expiry_date else 'None' }}
+                    </span>
+                  </td>
+                  <td>
+                    {% if inv.status == 'Available' %}
+                      <span class="badge bg-success-subtle text-success border border-success px-2 py-1">Available</span>
+                    {% elif inv.status == 'Out of Stock' %}
+                      <span class="badge bg-warning-subtle text-warning border border-warning px-2 py-1">Out of Stock</span>
+                    {% elif inv.status == 'Expired' %}
+                      <span class="badge bg-danger-subtle text-danger border border-danger px-2 py-1">Expired</span>
+                    {% else %}
+                      <span class="badge bg-secondary-subtle text-secondary border border-secondary px-2 py-1">Inactive</span>
+                    {% endif %}
+                  </td>
+                  <td class="pe-4 text-end">
+                      <button type="submit" class="btn btn-sm btn-teal text-white rounded-pill px-3 me-1" style="background-color: #0d9488;">
+                        <i class="bi bi-check2"></i> Save
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB 4: ADMIN ACCOUNTS ──────────────────────────────────────── -->
+    <div class="tab-pane fade" id="tab-admins" role="tabpanel">
+      <div class="card card-glass p-4 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom">
+          <div>
+            <h4 class="fw-bold text-dark mb-1"><i class="bi bi-people-fill text-teal me-2"></i> Admin & User Accounts</h4>
+            <p class="text-muted small mb-0">System administrator accounts and their associated pharmacy branches.</p>
+          </div>
+        </div>
+
+        <div class="table-responsive rounded-3 border">
+          <table class="table table-hover align-middle mb-0 bg-white">
+            <thead class="table-light text-muted small text-uppercase">
+              <tr>
+                <th class="py-3 ps-4">Admin ID</th>
+                <th class="py-3">Username</th>
+                <th class="py-3">Associated Pharmacy</th>
+                <th class="py-3">Owner Contact</th>
+                <th class="py-3">Registered On</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for a in admins %}
+                <tr>
+                  <td class="ps-4 fw-bold text-muted">#{{ a.admin_id }}</td>
+                  <td>
+                    <span class="badge bg-dark px-3 py-2 rounded-pill fs-6"><i class="bi bi-person-fill me-1"></i> {{ a.username }}</span>
+                  </td>
+                  <td>
+                    {% if a.pharmacy %}
+                      <strong class="text-dark">{{ a.pharmacy.shop_name }}</strong>
+                      <div class="small text-muted">{{ a.pharmacy.address }}</div>
+                    {% else %}
+                      <span class="text-muted small">No pharmacy linked</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if a.pharmacy %}
+                      <div class="text-dark fw-medium">{{ a.pharmacy.owner_name }}</div>
+                      <div class="small text-muted">{{ a.pharmacy.phone }}</div>
+                    {% else %}
+                      <span class="text-muted small">—</span>
+                    {% endif %}
+                  </td>
+                  <td class="small text-muted">
+                    {{ a.created_at.strftime('%b %d, %Y %I:%M %p') if a.created_at else 'N/A' }}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

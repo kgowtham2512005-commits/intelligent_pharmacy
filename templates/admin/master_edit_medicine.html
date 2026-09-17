@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Master Edit Medicine — {{ medicine.medicine_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 900px;">
+
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <a href="{{ url_for('admin_bp.master_dashboard') }}" class="btn btn-sm btn-outline-secondary rounded-pill">
+      <i class="bi bi-arrow-left"></i> Back to Master Portal
+    </a>
+    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-3 py-2 rounded-pill">
+      Global Medicine ID #{{ medicine.medicine_id }}
+    </span>
+  </div>
+
+  <div class="card card-glass p-4 p-md-5 border-top border-4 border-teal" style="border-color: #0d9488 !important;">
+    <div class="d-flex align-items-center gap-3 mb-4 border-bottom pb-3">
+      <div class="brand-icon bg-teal text-white fs-3" style="width: 48px; height: 48px; border-radius: 14px; background-color: #0d9488;">
+        <i class="bi bi-capsule"></i>
+      </div>
+      <div>
+        <h3 class="fw-bold mb-0 text-dark">Edit Global Medicine Record</h3>
+        <p class="text-muted small mb-0">Master edit control for <strong>{{ medicine.medicine_name }}</strong></p>
+      </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('admin_bp.master_edit_medicine', medicine_id=medicine.medicine_id) }}">
+      <div class="row g-3">
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold small text-dark">Medicine Brand / Name <span class="text-danger">*</span></label>
+          <input type="text" name="medicine_name" class="form-control" value="{{ medicine.medicine_name }}" required>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold small text-dark">Generic / Salt Name</label>
+          <input type="text" name="generic_name" class="form-control" value="{{ medicine.generic_name or '' }}" placeholder="e.g. Paracetamol">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold small text-dark">Medicine Form / Type</label>
+          <select name="medicine_type" class="form-select">
+            <option value="Tablet" {% if medicine.medicine_type == 'Tablet' %}selected{% endif %}>Tablet</option>
+            <option value="Capsule" {% if medicine.medicine_type == 'Capsule' %}selected{% endif %}>Capsule</option>
+            <option value="Syrup" {% if medicine.medicine_type == 'Syrup' %}selected{% endif %}>Syrup</option>
+            <option value="Ointment" {% if medicine.medicine_type == 'Ointment' %}selected{% endif %}>Ointment / Cream</option>
+            <option value="Drops" {% if medicine.medicine_type == 'Drops' %}selected{% endif %}>Drops</option>
+            <option value="Inhaler" {% if medicine.medicine_type == 'Inhaler' %}selected{% endif %}>Inhaler</option>
+            <option value="Spray" {% if medicine.medicine_type == 'Spray' %}selected{% endif %}>Spray</option>
+            <option value="Powder" {% if medicine.medicine_type == 'Powder' %}selected{% endif %}>Powder / Sachet</option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold small text-dark">Therapeutic Category</label>
+          <input type="text" name="category" class="form-control" value="{{ medicine.category or '' }}" placeholder="e.g. Pain & Fever, Antacid, Antibiotic">
+        </div>
+
+        <div class="col-12">
+          <label class="form-label fw-bold small text-dark">Medical Uses</label>
+          <textarea name="uses" rows="3" class="form-control" placeholder="What conditions does this treat?">{{ medicine.uses or '' }}</textarea>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label fw-bold small text-dark">Purpose & Action</label>
+          <textarea name="purpose" rows="2" class="form-control" placeholder="Brief clinical purpose...">{{ medicine.purpose or '' }}</textarea>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label fw-bold small text-dark">How to Take / Instructions</label>
+          <textarea name="how_to_use" rows="3" class="form-control" placeholder="Usage instructions...">{{ medicine.how_to_use or '' }}</textarea>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold small text-dark">Precautions</label>
+          <textarea name="precautions" rows="2" class="form-control">{{ medicine.precautions or '' }}</textarea>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label fw-bold small text-dark">Warnings & Side Effects</label>
+          <textarea name="warnings" rows="2" class="form-control">{{ medicine.warnings or '' }}</textarea>
+        </div>
+
+        <div class="col-12 mt-4 d-flex justify-content-between align-items-center">
+          <a href="{{ url_for('admin_bp.master_dashboard') }}" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+          <button type="submit" class="btn btn-teal text-white rounded-pill px-5 shadow-sm" style="background-color: #0d9488;">
+            <i class="bi bi-check2-circle me-1"></i> Save Global Changes
+          </button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

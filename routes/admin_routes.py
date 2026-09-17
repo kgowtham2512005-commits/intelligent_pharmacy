@@ -576,3 +576,181 @@ def toggle_status(inventory_id):
     new_status = "activated" if inv.is_active else "deactivated"
     flash(f"Medicine '{inv.medicine.medicine_name}' has been {new_status}.", "info")
     return redirect(url_for('admin_bp.medicines'))
+
+
+# ==========================================
+# MASTER / OVERALL ADMIN PORTAL
+# ==========================================
+
+@admin_bp.route('/master')
+@admin_required
+def master_dashboard():
+    """Overall Super Admin Dashboard with access to all users, pharmacies, medicines, and inventories."""
+    pharmacies = Pharmacy.query.order_by(Pharmacy.pharmacy_id.asc()).all()
+    medicines = Medicine.query.order_by(Medicine.medicine_name.asc()).all()
+    inventories = PharmacyInventory.query.order_by(PharmacyInventory.pharmacy_id.asc(), PharmacyInventory.medicine_id.asc()).all()
+    admins = Admin.query.order_by(Admin.admin_id.asc()).all()
+
+    total_pharmacies = len(pharmacies)
+    total_medicines = len(medicines)
+    total_stock_units = sum(item.stock_quantity for item in inventories if item.is_active)
+    total_inventory_value = sum(float(item.price) * item.stock_quantity for item in inventories if item.is_active)
+
+    return render_template(
+        'admin/master_dashboard.html',
+        pharmacies=pharmacies,
+        medicines=medicines,
+        inventories=inventories,
+        admins=admins,
+        total_pharmacies=total_pharmacies,
+        total_medicines=total_medicines,
+        total_stock_units=total_stock_units,
+        total_inventory_value=total_inventory_value
+    )
+
+
+@admin_bp.route('/master/pharmacy/<int:pharmacy_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def master_edit_pharmacy(pharmacy_id):
+    """Master Admin: Edit any pharmacy profile."""
+    pharmacy = Pharmacy.query.get_or_404(pharmacy_id)
+
+    if request.method == 'POST':
+        shop_name = request.form.get('shop_name', '').strip()
+        owner_name = request.form.get('owner_name', '').strip()
+        phone = request.form.get('phone', '').strip()
+        address = request.form.get('address', '').strip()
+        distance_km = request.form.get('distance_km', '').strip()
+        latitude = request.form.get('latitude', '').strip()
+        longitude = request.form.get('longitude', '').strip()
+
+        if not shop_name or not owner_name or not phone or not address:
+            flash("Shop name, owner name, phone, and address are required.", "danger")
+            return render_template('admin/master_edit_pharmacy.html', pharmacy=pharmacy)
+
+        try:
+            pharmacy.shop_name = shop_name
+            pharmacy.owner_name = owner_name
+            pharmacy.phone = phone
+            pharmacy.address = address
+            pharmacy.distance_km = float(distance_km) if distance_km else None
+            pharmacy.latitude = float(latitude) if latitude else None
+            pharmacy.longitude = float(longitude) if longitude else None
+
+            db.session.commit()
+            flash(f"Pharmacy '{pharmacy.shop_name}' updated successfully!", "success")
+            return redirect(url_for('admin_bp.master_dashboard'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error updating pharmacy: {str(e)}", "danger")
+
+    return render_template('admin/master_edit_pharmacy.html', pharmacy=pharmacy)
+
+
+@admin_bp.route('/master/pharmacy/<int:pharmacy_id>/delete', methods=['POST'])
+@admin_required
+def master_delete_pharmacy(pharmacy_id):
+    """Master Admin: Delete a pharmacy and all its inventory items."""
+    pharmacy = Pharmacy.query.get_or_404(pharmacy_id)
+    name = pharmacy.shop_name
+    try:
+        db.session.delete(pharmacy)
+        db.session.commit()
+        flash(f"Pharmacy '{name}' and associated inventory deleted successfully.", "info")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error deleting pharmacy: {str(e)}", "danger")
+
+    return redirect(url_for('admin_bp.master_dashboard'))
+
+
+@admin_bp.route('/master/medicine/<int:medicine_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def master_edit_medicine(medicine_id):
+    """Master Admin: Edit global medicine catalog entry."""
+    medicine = Medicine.query.get_or_404(medicine_id)
+
+    if request.method == 'POST':
+        medicine_name = request.form.get('medicine_name', '').strip()
+        generic_name = request.form.get('generic_name', '').strip()
+        medicine_type = request.form.get('medicine_type', '').strip()
+        category = request.form.get('category', '').strip()
+        uses = request.form.get('uses', '').strip()
+        purpose = request.form.get('purpose', '').strip()
+        how_to_use = request.form.get('how_to_use', '').strip()
+        precautions = request.form.get('precautions', '').strip()
+        warnings = request.form.get('warnings', '').strip()
+
+        if not medicine_name:
+            flash("Medicine name is required.", "danger")
+            return render_template('admin/master_edit_medicine.html', medicine=medicine)
+
+        try:
+            medicine.medicine_name = medicine_name
+            medicine.generic_name = generic_name if generic_name else None
+            medicine.medicine_type = medicine_type if medicine_type else None
+            medicine.category = category if category else None
+            medicine.uses = uses if uses else None
+            medicine.purpose = purpose if purpose else None
+            medicine.how_to_use = how_to_use if how_to_use else None
+            medicine.precautions = precautions if precautions else None
+            medicine.warnings = warnings if warnings else None
+
+            db.session.commit()
+            flash(f"Global medicine '{medicine.medicine_name}' updated successfully!", "success")
+            return redirect(url_for('admin_bp.master_dashboard'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error updating medicine: {str(e)}", "danger")
+
+    return render_template('admin/master_edit_medicine.html', medicine=medicine)
+
+
+@admin_bp.route('/master/medicine/<int:medicine_id>/delete', methods=['POST'])
+@admin_required
+def master_delete_medicine(medicine_id):
+    """Master Admin: Delete a global medicine and its cross-pharmacy inventory links."""
+    medicine = Medicine.query.get_or_404(medicine_id)
+    name = medicine.medicine_name
+    try:
+        db.session.delete(medicine)
+        db.session.commit()
+        flash(f"Medicine '{name}' removed from global catalog.", "info")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error deleting medicine: {str(e)}", "danger")
+
+    return redirect(url_for('admin_bp.master_dashboard'))
+
+
+@admin_bp.route('/master/inventory/<int:inventory_id>/quick-update', methods=['POST'])
+@admin_required
+def master_quick_update_inventory(inventory_id):
+    """Master Admin: Quick update price and stock for any pharmacy's inventory item."""
+    inv = PharmacyInventory.query.get_or_404(inventory_id)
+    price_str = request.form.get('price', '').strip()
+    stock_str = request.form.get('stock_quantity', '').strip()
+
+    try:
+        if price_str:
+            new_price = float(price_str)
+            if new_price <= 0:
+                flash("Price must be greater than 0.", "danger")
+                return redirect(url_for('admin_bp.master_dashboard'))
+            inv.price = new_price
+
+        if stock_str:
+            new_stock = int(stock_str)
+            if new_stock < 0:
+                flash("Stock cannot be negative.", "danger")
+                return redirect(url_for('admin_bp.master_dashboard'))
+            inv.stock_quantity = new_stock
+
+        inv.last_updated = datetime.utcnow()
+        db.session.commit()
+        flash(f"Updated '{inv.medicine.medicine_name}' at '{inv.pharmacy.shop_name}': ₹{inv.price}, {inv.stock_quantity} units.", "success")
+    except ValueError:
+        flash("Invalid price or stock format.", "danger")
+
+    return redirect(url_for('admin_bp.master_dashboard'))
+

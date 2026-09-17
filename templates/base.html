@@ -46,7 +46,12 @@
           {% if session.get('admin_id') %}
             <li class="nav-item">
               <a class="nav-link text-light px-3 fw-semibold" href="{{ url_for('admin_bp.dashboard') }}">
-                <i class="bi bi-speedometer2 me-1"></i> Admin Dashboard
+                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-warning px-3 fw-bold" href="{{ url_for('admin_bp.master_dashboard') }}">
+                <i class="bi bi-shield-lock-fill me-1"></i> Master Admin
               </a>
             </li>
             <li class="nav-item ms-lg-2">
