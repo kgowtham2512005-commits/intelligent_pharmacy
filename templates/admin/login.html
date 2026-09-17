@@ -17,10 +17,10 @@
 
         <form action="{{ url_for('admin_bp.login') }}" method="POST" id="loginForm">
           <div class="mb-3">
-            <label for="username" class="form-label fw-semibold">Username</label>
+            <label for="username" class="form-label fw-semibold">Username / Email</label>
             <div class="input-group">
-              <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
-              <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" value="{{ username or '' }}" required autofocus>
+              <span class="input-group-text bg-white"><i class="bi bi-envelope"></i></span>
+              <input type="text" class="form-control" id="username" name="username" placeholder="e.g. sri741815@gmail.com" value="{{ username or '' }}" required autofocus>
             </div>
           </div>
 
