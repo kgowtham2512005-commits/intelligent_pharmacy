@@ -93,13 +93,13 @@
       </div>
     </div>
 
-    <!-- Out of Stock -->
+    <!-- Out of Stock / Low Stock -->
     <div class="col-md-3 col-sm-6">
       <div class="stat-card border-start border-4 border-warning">
         <div class="d-flex justify-content-between align-items-center">
           <div>
-            <div class="text-muted small fw-semibold">Out of Stock</div>
-            <div class="fs-3 fw-bold text-warning mt-1">{{ out_of_stock_medicines }}</div>
+            <div class="text-muted small fw-semibold">Low / Out of Stock</div>
+            <div class="fs-3 fw-bold text-warning mt-1">{{ low_stock_medicines + out_of_stock_medicines }}</div>
           </div>
           <div class="stat-icon bg-warning bg-opacity-10 text-warning">
             <i class="bi bi-exclamation-triangle-fill"></i>
@@ -108,17 +108,109 @@
       </div>
     </div>
 
-    <!-- Expired or Inactive -->
+    <!-- Expired or Expiring Soon -->
     <div class="col-md-3 col-sm-6">
-      <div class="stat-card border-start border-4 border-secondary">
+      <div class="stat-card border-start border-4 border-danger">
         <div class="d-flex justify-content-between align-items-center">
           <div>
-            <div class="text-muted small fw-semibold">Inactive / Expired</div>
-            <div class="fs-3 fw-bold text-secondary mt-1">{{ inactive_medicines + expired_medicines }}</div>
+            <div class="text-muted small fw-semibold">Expiry Alerts</div>
+            <div class="fs-3 fw-bold text-danger mt-1">{{ expiry_alerts|length }}</div>
           </div>
-          <div class="stat-icon bg-secondary bg-opacity-10 text-secondary">
-            <i class="bi bi-archive-fill"></i>
+          <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+            <i class="bi bi-calendar-x-fill"></i>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Smart Alerts & Notifications Section (Phase 17) -->
+  {% if expiry_alerts or low_stock_alerts %}
+    <div class="card card-glass p-4 mb-4 border-start border-4 border-warning">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="d-flex align-items-center gap-2">
+          <div class="brand-icon bg-warning bg-opacity-10 text-warning fs-5" style="width: 36px; height: 36px; border-radius: 10px;">
+            <i class="bi bi-bell-fill"></i>
+          </div>
+          <h5 class="fw-bold text-dark mb-0">Smart Inventory Alerts & Notifications</h5>
+        </div>
+        <span class="badge bg-danger rounded-pill px-3 py-1">
+          {{ expiry_alerts|length + low_stock_alerts|length }} Attention Required
+        </span>
+      </div>
+
+      <div class="row g-3">
+        <!-- Expiry Warnings -->
+        {% if expiry_alerts %}
+          <div class="col-lg-6">
+            <div class="card border rounded-3 p-3 bg-white h-100 shadow-xs">
+              <h6 class="fw-bold text-danger mb-2">
+                <i class="bi bi-calendar-event me-1"></i> Expiry Warnings ({{ expiry_alerts|length }})
+              </h6>
+              <div class="list-group list-group-flush small">
+                {% for alert in expiry_alerts[:5] %}
+                  <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                    <div>
+                      <strong class="text-dark">{{ alert.medicine_name }}</strong>
+                      <div class="text-muted small">Expiry: {{ alert.expiry_date }}</div>
+                    </div>
+                    <span class="badge {% if alert.urgency == 'critical' %}bg-danger{% else %}bg-warning text-dark{% endif %} rounded-pill">
+                      {{ alert.message }}
+                    </span>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- Low Stock Warnings -->
+        {% if low_stock_alerts %}
+          <div class="col-lg-6">
+            <div class="card border rounded-3 p-3 bg-white h-100 shadow-xs">
+              <h6 class="fw-bold text-warning text-dark mb-2">
+                <i class="bi bi-box-seam me-1 text-warning"></i> Stock Shortages ({{ low_stock_alerts|length }})
+              </h6>
+              <div class="list-group list-group-flush small">
+                {% for alert in low_stock_alerts[:5] %}
+                  <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                    <div>
+                      <strong class="text-dark">{{ alert.medicine_name }}</strong>
+                      <div class="text-muted small">{{ alert.stock_quantity }} units in stock</div>
+                    </div>
+                    <span class="badge {% if alert.urgency == 'critical' %}bg-danger{% else %}bg-warning text-dark{% endif %} rounded-pill">
+                      {{ alert.message }}
+                    </span>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Visual Analytics Section (Phase 18) -->
+  <div class="row g-4 mb-4">
+    <!-- Stock Status Breakdown -->
+    <div class="col-lg-5">
+      <div class="card card-glass p-4 h-100">
+        <h5 class="fw-bold text-dark mb-1"><i class="bi bi-pie-chart-fill text-teal me-2"></i> Stock Health Status</h5>
+        <p class="text-muted small mb-3">Breakdown of inventory by availability and risk.</p>
+        <div style="height: 240px; position: relative;">
+          <canvas id="stockStatusChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Distribution -->
+    <div class="col-lg-7">
+      <div class="card card-glass p-4 h-100">
+        <h5 class="fw-bold text-dark mb-1"><i class="bi bi-bar-chart-fill text-teal me-2"></i> Medicines by Category</h5>
+        <p class="text-muted small mb-3">Therapeutic categories stocked in this pharmacy.</p>
+        <div style="height: 240px; position: relative;">
+          <canvas id="categoryChart"></canvas>
         </div>
       </div>
     </div>
@@ -228,3 +320,82 @@
 
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js for Visual Analytics (Phase 18) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. Stock Status Donut Chart
+    const stockCtx = document.getElementById('stockStatusChart');
+    if (stockCtx) {
+      new Chart(stockCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['In Stock', 'Low Stock', 'Out of Stock', 'Expired'],
+          datasets: [{
+            data: [
+              {{ available_medicines - low_stock_medicines if (available_medicines - low_stock_medicines) >= 0 else 0 }},
+              {{ low_stock_medicines }},
+              {{ out_of_stock_medicines }},
+              {{ expired_medicines }}
+            ],
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#94a3b8'],
+            borderWidth: 2,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { family: 'Outfit, sans-serif' } } }
+          },
+          cutout: '65%'
+        }
+      });
+    }
+
+    // 2. Category Distribution Bar Chart
+    const catCtx = document.getElementById('categoryChart');
+    if (catCtx) {
+      const categoryData = {{ category_counts|tojson }};
+      const catLabels = Object.keys(categoryData);
+      const catCounts = Object.values(categoryData);
+
+      new Chart(catCtx, {
+        type: 'bar',
+        data: {
+          labels: catLabels.length > 0 ? catLabels : ['General'],
+          datasets: [{
+            label: 'Medicines',
+            data: catCounts.length > 0 ? catCounts : [0],
+            backgroundColor: '#0d9488',
+            borderRadius: 6,
+            hoverBackgroundColor: '#0f766e'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 1, font: { family: 'Outfit, sans-serif' } },
+              grid: { color: 'rgba(0,0,0,0.05)' }
+            },
+            x: {
+              ticks: { font: { family: 'Outfit, sans-serif' } },
+              grid: { display: false }
+            }
+          },
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}
+

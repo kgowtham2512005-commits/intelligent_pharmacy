@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from functools import wraps
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, g
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -160,13 +160,13 @@ def logout():
     return redirect(url_for('admin_bp.login'))
 
 # ==========================================
-# DASHBOARD (Phase 5)
+# DASHBOARD (Phases 5, 17 & 18)
 # ==========================================
 
 @admin_bp.route('/dashboard')
 @admin_required
 def dashboard():
-    """Protected Admin Dashboard displaying stats specific to logged-in pharmacy."""
+    """Protected Admin Dashboard displaying stats, smart alerts & visual analytics."""
     pharmacy = g.pharmacy
 
     # Retrieve all inventory items belonging strictly to this pharmacy
@@ -176,10 +176,56 @@ def dashboard():
     total_medicines = len(all_items)
     
     today = date.today()
+    exp_threshold = today + timedelta(days=30)
+    
     available_medicines = sum(1 for item in all_items if item.is_active and item.stock_quantity > 0 and (not item.expiry_date or item.expiry_date >= today))
+    low_stock_medicines = sum(1 for item in all_items if item.is_active and 0 < item.stock_quantity <= 10)
     out_of_stock_medicines = sum(1 for item in all_items if item.is_active and item.stock_quantity <= 0)
     expired_medicines = sum(1 for item in all_items if item.is_active and item.expiry_date and item.expiry_date < today)
+    expiring_soon_medicines = sum(1 for item in all_items if item.is_active and item.expiry_date and today <= item.expiry_date <= exp_threshold)
     inactive_medicines = sum(1 for item in all_items if not item.is_active)
+
+    # Expiry & Low Stock Alert lists
+    expiry_alerts = []
+    low_stock_alerts = []
+    category_counts = {}
+
+    for item in all_items:
+        # Category counting for Chart.js
+        cat = item.medicine.category or 'General'
+        category_counts[cat] = category_counts.get(cat, 0) + 1
+
+        if item.is_active:
+            # Expiry check
+            if item.expiry_date:
+                days_left = (item.expiry_date - today).days
+                if days_left < 0:
+                    expiry_alerts.append({
+                        'medicine_name': item.medicine.medicine_name,
+                        'expiry_date': item.expiry_date.strftime('%Y-%m-%d'),
+                        'days_left': days_left,
+                        'urgency': 'critical',
+                        'message': f"Expired {abs(days_left)} days ago",
+                        'inventory_id': item.inventory_id
+                    })
+                elif days_left <= 30:
+                    expiry_alerts.append({
+                        'medicine_name': item.medicine.medicine_name,
+                        'expiry_date': item.expiry_date.strftime('%Y-%m-%d'),
+                        'days_left': days_left,
+                        'urgency': 'warning' if days_left <= 15 else 'info',
+                        'message': f"Expires in {days_left} days",
+                        'inventory_id': item.inventory_id
+                    })
+            # Low stock check
+            if item.stock_quantity <= 10:
+                low_stock_alerts.append({
+                    'medicine_name': item.medicine.medicine_name,
+                    'stock_quantity': item.stock_quantity,
+                    'urgency': 'critical' if item.stock_quantity == 0 else 'warning',
+                    'message': 'Out of Stock' if item.stock_quantity == 0 else f'Low Stock ({item.stock_quantity} left)',
+                    'inventory_id': item.inventory_id
+                })
 
     # Recently updated medicines (limit 5)
     recently_updated = inventory_query.order_by(PharmacyInventory.last_updated.desc()).limit(5).all()
@@ -189,10 +235,15 @@ def dashboard():
         pharmacy=pharmacy,
         total_medicines=total_medicines,
         available_medicines=available_medicines,
+        low_stock_medicines=low_stock_medicines,
         out_of_stock_medicines=out_of_stock_medicines,
         expired_medicines=expired_medicines,
+        expiring_soon_medicines=expiring_soon_medicines,
         inactive_medicines=inactive_medicines,
-        recently_updated=recently_updated
+        recently_updated=recently_updated,
+        expiry_alerts=expiry_alerts,
+        low_stock_alerts=low_stock_alerts,
+        category_counts=category_counts
     )
 
 # ==========================================

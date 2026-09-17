@@ -33,8 +33,14 @@
           </div>
         </div>
 
-        <div class="mt-3">
-          <span class="badge bg-light text-dark border me-2"><i class="bi bi-tag me-1"></i> {{ medicine.category or 'General Medicine' }}</span>
+        <div class="mt-3 d-flex flex-wrap gap-2 align-items-center">
+          <span class="badge bg-light text-dark border"><i class="bi bi-tag me-1"></i> {{ medicine.category or 'General Medicine' }}</span>
+          
+          <!-- Read Aloud Voice Button (Phase 13 & 15) -->
+          <button type="button" id="btnReadAloud" class="btn btn-sm btn-outline-teal rounded-pill px-3 d-inline-flex align-items-center gap-1 shadow-sm" onclick="readMedicineAloud()" style="border-color: #0d9488; color: #0d9488;">
+            <i class="bi bi-volume-up-fill" id="readAloudIcon"></i>
+            <span id="readAloudText">Read Details Aloud</span>
+          </button>
         </div>
 
         {% if medicine.uses %}
@@ -121,6 +127,49 @@
       </div>
     </div>
   </div>
+
+  <!-- Alternative / Generic Medicines Recommendation Section (Phase 15) -->
+  {% if alternatives %}
+    <div class="card card-glass p-4 mb-4 border-start border-4 border-info">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+          <h4 class="fw-bold text-dark mb-1">
+            <i class="bi bi-stars text-info me-2"></i> Affordable / Generic Alternatives
+          </h4>
+          <p class="text-muted small mb-0">Same active ingredients or therapeutic category with competitive prices.</p>
+        </div>
+        <span class="badge bg-info bg-opacity-10 text-info border border-info px-3 py-2 rounded-pill">
+          {{ alternatives|length }} Alternative{{ 's' if alternatives|length > 1 else '' }} Found
+        </span>
+      </div>
+
+      <div class="row g-3">
+        {% for alt in alternatives %}
+          <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border rounded-3 p-3 bg-white shadow-xs hover-shadow transition">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h6 class="fw-bold text-dark mb-0">{{ alt.name }}</h6>
+                {% if alt.lowest_price %}
+                  <span class="badge bg-success-subtle text-success fw-bold">₹{{ "%.2f"|format(alt.lowest_price) }}</span>
+                {% else %}
+                  <span class="badge bg-secondary-subtle text-muted">Out of stock</span>
+                {% endif %}
+              </div>
+              <small class="text-muted d-block mb-2"><i class="bi bi-prescription me-1"></i> {{ alt.generic_name or alt.category }}</small>
+              <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+                <small class="text-muted">
+                  <i class="bi bi-shop me-1"></i> {{ alt.available_count }} / {{ alt.total_pharmacies }} pharmacies
+                </small>
+                <a href="{{ url_for('user_bp.medicine_detail', medicine_id=alt.medicine_id, lat=user_lat, lng=user_lng) }}" class="btn btn-xs btn-outline-teal rounded-pill px-2 py-1 text-xs" style="font-size: 0.78rem; border-color: #0d9488; color: #0d9488;">
+                  View <i class="bi bi-chevron-right ms-1"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
 
   <!-- Price Comparison & Nearby Pharmacies Section (Phases 11 & 12) -->
   <div class="card card-glass p-4 mb-4">
@@ -235,4 +284,55 @@
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/user_search.js') }}"></script>
+<script>
+  let isSpeaking = false;
+  function readMedicineAloud() {
+    if (!('speechSynthesis' in window)) {
+      alert('Text-to-speech is not supported in this browser.');
+      return;
+    }
+
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      isSpeaking = false;
+      document.getElementById('readAloudIcon').className = 'bi bi-volume-up-fill';
+      document.getElementById('readAloudText').textContent = 'Read Details Aloud';
+      return;
+    }
+
+    const medName = {{ medicine.medicine_name|tojson }};
+    const genericName = {{ medicine.generic_name|tojson or '""' }};
+    const uses = {{ medicine.uses|tojson or '""' }};
+    const lowestPrice = {{ lowest_available_price|tojson or 'null' }};
+
+    let textToSpeak = `Medicine details for ${medName}. `;
+    if (genericName) textToSpeak += `Generic compound: ${genericName}. `;
+    if (uses) textToSpeak += `Used for: ${uses}. `;
+    if (lowestPrice) {
+      textToSpeak += `The lowest available price is ₹${lowestPrice} rupees. `;
+    } else {
+      textToSpeak += `Currently out of stock across nearby pharmacies. `;
+    }
+    textToSpeak += `Always consult your doctor or pharmacist before taking this medication.`;
+
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    utterance.lang = 'en-IN';
+    utterance.rate = 0.95;
+
+    utterance.onstart = () => {
+      isSpeaking = true;
+      document.getElementById('readAloudIcon').className = 'bi bi-stop-fill text-danger';
+      document.getElementById('readAloudText').textContent = 'Stop Reading';
+    };
+
+    utterance.onend = utterance.onerror = () => {
+      isSpeaking = false;
+      document.getElementById('readAloudIcon').className = 'bi bi-volume-up-fill';
+      document.getElementById('readAloudText').textContent = 'Read Details Aloud';
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+</script>
 {% endblock %}
+

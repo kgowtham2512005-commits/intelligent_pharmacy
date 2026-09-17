@@ -5,6 +5,8 @@ from config import Config
 from models.database import db
 from routes.user_routes import user_bp
 from routes.admin_routes import admin_bp
+from routes.voice_routes import voice_bp
+from routes.alerts_routes import alerts_bp
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -40,6 +42,8 @@ def create_app(config_class=Config):
     # Register blueprints
     app.register_blueprint(user_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(voice_bp)
+    app.register_blueprint(alerts_bp)
 
     @app.errorhandler(404)
     def page_not_found(e):

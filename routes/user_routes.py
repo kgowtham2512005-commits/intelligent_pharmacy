@@ -149,15 +149,37 @@ def medicine_detail(medicine_id):
         pharmacies_data.sort(key=lambda p: (p['distance'] if p['distance'] is not None else 99999, p['price']))
     elif sort_by == 'stock':
         pharmacies_data.sort(key=lambda p: (not p['is_available'], -p['stock_quantity'], p['price']))
-    else:  # default 'price'
-        pharmacies_data.sort(key=lambda p: (not p['is_available'], p['price']))
+    # Find generic/alternative medicines (Phase 15)
+    from services.recommendation_service import find_alternatives
+    alt_names = find_alternatives(medicine.medicine_name, medicine.generic_name, medicine.category)
+    alternatives_data = []
+    if alt_names:
+        for aname in alt_names:
+            alt_meds = Medicine.query.filter(Medicine.medicine_name.ilike(f"%{aname}%")).all()
+            for am in alt_meds:
+                if am.medicine_id != medicine.medicine_id and not any(x['medicine_id'] == am.medicine_id for x in alternatives_data):
+                    a_items = PharmacyInventory.query.filter_by(medicine_id=am.medicine_id, is_active=True).all()
+                    a_items = [i for i in a_items if not i.expiry_date or i.expiry_date >= today]
+                    a_avail = [i for i in a_items if i.stock_quantity > 0]
+                    a_price = min([float(i.price) for i in a_avail]) if a_avail else None
+                    alternatives_data.append({
+                        'medicine_id': am.medicine_id,
+                        'name': am.medicine_name,
+                        'generic_name': am.generic_name,
+                        'category': am.category,
+                        'lowest_price': a_price,
+                        'available_count': len(a_avail),
+                        'total_pharmacies': len(a_items)
+                    })
 
     return render_template(
         'user/medicine_detail.html',
         medicine=medicine,
         pharmacies=pharmacies_data,
         lowest_available_price=lowest_available_price,
+        alternatives=alternatives_data,
         user_lat=user_lat,
         user_lng=user_lng,
         sort_by=sort_by
     )
+
