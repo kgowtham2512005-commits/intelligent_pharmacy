@@ -124,7 +124,7 @@
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom">
           <div>
             <h4 class="fw-bold text-dark mb-1"><i class="bi bi-shop text-teal me-2"></i> Registered Pharmacies Management</h4>
-            <p class="text-muted small mb-0">View and edit contact details, locations, and inventory counts for every registered store.</p>
+            <p class="text-muted small mb-0">View contact details, stock unit counts, total inventory valuations, and locations for every registered store.</p>
           </div>
           <a href="{{ url_for('admin_bp.register') }}" class="btn btn-teal text-white rounded-pill px-4 shadow-sm" style="background-color: #0d9488;">
             <i class="bi bi-plus-circle me-1"></i> Register New Pharmacy
@@ -138,13 +138,15 @@
                 <th class="py-3 ps-4">ID</th>
                 <th class="py-3">Pharmacy & Owner</th>
                 <th class="py-3">Contact & Address</th>
-                <th class="py-3">Coordinates / Dist</th>
-                <th class="py-3">Stocked Items</th>
+                <th class="py-3">Medicines Stocked</th>
+                <th class="py-3">Total Units</th>
+                <th class="py-3">Stock Valuation</th>
                 <th class="py-3 pe-4 text-end">Actions</th>
               </tr>
             </thead>
             <tbody>
               {% for p in pharmacies %}
+                {% set pstat = pharmacy_stats.get(p.pharmacy_id, {}) %}
                 <tr>
                   <td class="ps-4 fw-bold text-muted">#{{ p.pharmacy_id }}</td>
                   <td>
@@ -159,16 +161,18 @@
                     </small>
                   </td>
                   <td>
-                    {% if p.distance_km is not none %}
-                      <span class="badge bg-primary bg-opacity-10 text-primary border rounded-pill">{{ p.distance_km }} km</span>
-                    {% else %}
-                      <span class="text-muted small">Lat: {{ p.latitude or '-' }}, Lng: {{ p.longitude or '-' }}</span>
-                    {% endif %}
+                    <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-bold">
+                      <i class="bi bi-capsule me-1 text-teal"></i> {{ pstat.get('total_medicines', p.inventory_items|length) }} items
+                    </span>
                   </td>
                   <td>
-                    <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-bold">
-                      <i class="bi bi-box-seam me-1 text-teal"></i> {{ p.inventory_items|length }} medicines
+                    <span class="badge bg-success-subtle text-success border border-success px-3 py-2 rounded-pill fw-bold">
+                      <i class="bi bi-boxes me-1"></i> {{ pstat.get('total_units', 0) }} units
                     </span>
+                  </td>
+                  <td>
+                    <div class="fw-bold text-dark fs-6">₹{{ "%.2f"|format(pstat.get('total_value', 0.0)) }}</div>
+                    <small class="text-muted">{{ pstat.get('available_count', 0) }} in stock</small>
                   </td>
                   <td class="pe-4 text-end">
                     <div class="btn-group">
@@ -196,7 +200,7 @@
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom">
           <div>
             <h4 class="fw-bold text-dark mb-1"><i class="bi bi-capsule text-teal me-2"></i> Global Medicine Catalog</h4>
-            <p class="text-muted small mb-0">Manage global medical names, generic formulas, categories, precautions, and uses.</p>
+            <p class="text-muted small mb-0">Master catalog showing price ranges, global stock availability, and stocking stores.</p>
           </div>
           <a href="{{ url_for('admin_bp.add_medicine') }}" class="btn btn-teal text-white rounded-pill px-4 shadow-sm" style="background-color: #0d9488;">
             <i class="bi bi-plus-circle me-1"></i> Add New Medicine
@@ -210,14 +214,16 @@
                 <th class="py-3 ps-4">ID</th>
                 <th class="py-3">Medicine Name</th>
                 <th class="py-3">Generic Salt</th>
-                <th class="py-3">Category / Type</th>
-                <th class="py-3">Uses & Purpose</th>
+                <th class="py-3">Category</th>
+                <th class="py-3">Price Range</th>
+                <th class="py-3">Total Available Stock</th>
                 <th class="py-3">Stores Stocking</th>
                 <th class="py-3 pe-4 text-end">Actions</th>
               </tr>
             </thead>
             <tbody>
               {% for m in medicines %}
+                {% set mstat = medicine_stats.get(m.medicine_id, {}) %}
                 <tr>
                   <td class="ps-4 fw-bold text-muted">#{{ m.medicine_id }}</td>
                   <td>
@@ -239,13 +245,31 @@
                     </span>
                   </td>
                   <td>
-                    <small class="text-muted d-block text-truncate" style="max-width: 250px;" title="{{ m.uses or m.purpose }}">
-                      {{ m.uses or m.purpose or 'General usage' }}
-                    </small>
+                    {% if mstat.get('min_price') is not none %}
+                      {% if mstat.get('min_price') == mstat.get('max_price') %}
+                        <span class="fw-bold text-dark fs-6">₹{{ "%.2f"|format(mstat.get('min_price')) }}</span>
+                      {% else %}
+                        <span class="fw-bold text-dark fs-6">₹{{ "%.2f"|format(mstat.get('min_price')) }} – ₹{{ "%.2f"|format(mstat.get('max_price')) }}</span>
+                      {% endif %}
+                    {% else %}
+                      <span class="badge bg-secondary-subtle text-secondary border">No pricing</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% set stock_val = mstat.get('total_stock', 0) %}
+                    {% if stock_val > 0 %}
+                      <span class="badge bg-success-subtle text-success border border-success px-3 py-2 rounded-pill fw-bold">
+                        <i class="bi bi-check2-circle me-1"></i> {{ stock_val }} units
+                      </span>
+                    {% else %}
+                      <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2 rounded-pill">
+                        Out of stock
+                      </span>
+                    {% endif %}
                   </td>
                   <td>
                     <span class="badge bg-light text-dark border px-2 py-1 rounded-pill">
-                      {{ m.inventory_items|length }} stores
+                      {{ mstat.get('stores_count', m.inventory_items|length) }} store(s)
                     </span>
                   </td>
                   <td class="pe-4 text-end">
@@ -277,40 +301,62 @@
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom">
           <div>
             <h4 class="fw-bold text-dark mb-1"><i class="bi bi-box-seam text-teal me-2"></i> Cross-Pharmacy Inventory Control</h4>
-            <p class="text-muted small mb-0">Direct master control over prices, stock counts, and status across all pharmacy inventories.</p>
+            <p class="text-muted small mb-0">Direct master view and live price/stock quick-editor for every store inventory item.</p>
+          </div>
+          <!-- Fast Search Filter for Master Inventory -->
+          <div style="min-width: 260px;">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+              <input type="text" id="masterInventorySearch" class="form-control" placeholder="Filter by medicine or pharmacy...">
+            </div>
           </div>
         </div>
 
         <div class="table-responsive rounded-3 border">
-          <table class="table table-hover align-middle mb-0 bg-white">
+          <table class="table table-hover align-middle mb-0 bg-white" id="masterInventoryTable">
             <thead class="table-light text-muted small text-uppercase">
               <tr>
                 <th class="py-3 ps-4">Pharmacy</th>
                 <th class="py-3">Medicine</th>
-                <th class="py-3">Price (₹)</th>
-                <th class="py-3">Stock Units</th>
+                <th class="py-3">Current Price & Edit</th>
+                <th class="py-3">Stock Units & Edit</th>
                 <th class="py-3">Expiry Date</th>
                 <th class="py-3">Status</th>
-                <th class="py-3 pe-4 text-end">Quick Update</th>
+                <th class="py-3 pe-4 text-end">Save</th>
               </tr>
             </thead>
             <tbody>
               {% for inv in inventories %}
-                <tr>
+                <tr class="master-inventory-row">
                   <td class="ps-4">
-                    <strong class="text-dark">{{ inv.pharmacy.shop_name }}</strong>
+                    <strong class="text-dark shop-name">{{ inv.pharmacy.shop_name }}</strong>
                     <div class="small text-muted"><i class="bi bi-telephone me-1"></i>{{ inv.pharmacy.phone }}</div>
                   </td>
                   <td>
-                    <strong class="text-dark">{{ inv.medicine.medicine_name }}</strong>
+                    <strong class="text-dark med-name">{{ inv.medicine.medicine_name }}</strong>
                     <div class="small text-muted">{{ inv.medicine.category or 'General' }}</div>
                   </td>
                   <td>
-                    <form id="masterQuickForm{{ inv.inventory_id }}" action="{{ url_for('admin_bp.master_quick_update_inventory', inventory_id=inv.inventory_id) }}" method="POST"></form>
-                    <input type="number" step="0.01" min="0.01" name="price" value="{{ inv.price }}" form="masterQuickForm{{ inv.inventory_id }}" class="form-control form-control-sm text-end" style="width: 85px;" required>
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="fw-bold text-success fs-6">₹{{ "%.2f"|format(inv.price) }}</span>
+                      <form id="masterQuickForm{{ inv.inventory_id }}" action="{{ url_for('admin_bp.master_quick_update_inventory', inventory_id=inv.inventory_id) }}" method="POST"></form>
+                      <div class="input-group input-group-sm" style="width: 105px;">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" step="0.01" min="0.01" name="price" value="{{ inv.price }}" form="masterQuickForm{{ inv.inventory_id }}" class="form-control text-end fw-semibold" required>
+                      </div>
+                    </div>
                   </td>
                   <td>
-                    <input type="number" min="0" name="stock_quantity" value="{{ inv.stock_quantity }}" form="masterQuickForm{{ inv.inventory_id }}" class="form-control form-control-sm text-end" style="width: 75px;" required>
+                    <div class="d-flex align-items-center gap-2">
+                      {% if inv.stock_quantity > 10 %}
+                        <span class="badge bg-success-subtle text-success border border-success px-2 py-1">{{ inv.stock_quantity }} units</span>
+                      {% elif inv.stock_quantity > 0 %}
+                        <span class="badge bg-warning-subtle text-warning border border-warning px-2 py-1">{{ inv.stock_quantity }} low</span>
+                      {% else %}
+                        <span class="badge bg-danger-subtle text-danger border border-danger px-2 py-1">0 units</span>
+                      {% endif %}
+                      <input type="number" min="0" name="stock_quantity" value="{{ inv.stock_quantity }}" form="masterQuickForm{{ inv.inventory_id }}" class="form-control form-control-sm text-end fw-semibold" style="width: 80px;" required>
+                    </div>
                   </td>
                   <td>
                     <span class="small {% if inv.is_expired %}text-danger fw-bold{% else %}text-muted{% endif %}">
@@ -319,17 +365,17 @@
                   </td>
                   <td>
                     {% if inv.status == 'Available' %}
-                      <span class="badge bg-success-subtle text-success border border-success px-2 py-1">Available</span>
+                      <span class="badge bg-success-subtle text-success border border-success px-2 py-1"><i class="bi bi-check-circle me-1"></i>Available</span>
                     {% elif inv.status == 'Out of Stock' %}
-                      <span class="badge bg-warning-subtle text-warning border border-warning px-2 py-1">Out of Stock</span>
+                      <span class="badge bg-warning-subtle text-warning border border-warning px-2 py-1"><i class="bi bi-exclamation-circle me-1"></i>Out of Stock</span>
                     {% elif inv.status == 'Expired' %}
-                      <span class="badge bg-danger-subtle text-danger border border-danger px-2 py-1">Expired</span>
+                      <span class="badge bg-danger-subtle text-danger border border-danger px-2 py-1"><i class="bi bi-calendar-x me-1"></i>Expired</span>
                     {% else %}
                       <span class="badge bg-secondary-subtle text-secondary border border-secondary px-2 py-1">Inactive</span>
                     {% endif %}
                   </td>
                   <td class="pe-4 text-end">
-                    <button type="submit" form="masterQuickForm{{ inv.inventory_id }}" class="btn btn-sm btn-teal text-white rounded-pill px-3 me-1" style="background-color: #0d9488;">
+                    <button type="submit" form="masterQuickForm{{ inv.inventory_id }}" class="btn btn-sm btn-teal text-white rounded-pill px-3 shadow-sm" style="background-color: #0d9488;">
                       <i class="bi bi-check2"></i> Save
                     </button>
                   </td>
@@ -400,3 +446,28 @@
 
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+  // Live filter for Master Inventory Table
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('masterInventorySearch');
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        const term = searchInput.value.toLowerCase().trim();
+        const rows = document.querySelectorAll('.master-inventory-row');
+        rows.forEach(row => {
+          const shop = row.querySelector('.shop-name')?.textContent.toLowerCase() || '';
+          const med = row.querySelector('.med-name')?.textContent.toLowerCase() || '';
+          if (shop.includes(term) || med.includes(term)) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      });
+    }
+  });
+</script>
+{% endblock %}
+

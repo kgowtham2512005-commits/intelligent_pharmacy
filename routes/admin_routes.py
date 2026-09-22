@@ -597,6 +597,40 @@ def master_dashboard():
     total_stock_units = sum(item.stock_quantity for item in inventories if item.is_active)
     total_inventory_value = sum(float(item.price) * item.stock_quantity for item in inventories if item.is_active)
 
+    # Precalculate per-pharmacy inventory & stock valuation stats
+    pharmacy_stats = {}
+    for p in pharmacies:
+        items = p.inventory_items
+        active_items = [i for i in items if i.is_active]
+        total_units = sum(i.stock_quantity for i in active_items)
+        total_val = sum(float(i.price) * i.stock_quantity for i in active_items)
+        avail_count = sum(1 for i in active_items if i.stock_quantity > 0)
+        pharmacy_stats[p.pharmacy_id] = {
+            'total_medicines': len(items),
+            'active_medicines': len(active_items),
+            'total_units': total_units,
+            'total_value': total_val,
+            'available_count': avail_count
+        }
+
+    # Precalculate per-medicine price range and total stock across all pharmacies
+    medicine_stats = {}
+    for m in medicines:
+        items = m.inventory_items
+        active_items = [i for i in items if i.is_active]
+        avail_items = [i for i in active_items if i.stock_quantity > 0]
+        prices = [float(i.price) for i in active_items]
+        total_stock = sum(i.stock_quantity for i in active_items)
+        min_price = min(prices) if prices else None
+        max_price = max(prices) if prices else None
+        medicine_stats[m.medicine_id] = {
+            'stores_count': len(items),
+            'available_stores': len(avail_items),
+            'total_stock': total_stock,
+            'min_price': min_price,
+            'max_price': max_price
+        }
+
     return render_template(
         'admin/master_dashboard.html',
         pharmacies=pharmacies,
@@ -606,7 +640,9 @@ def master_dashboard():
         total_pharmacies=total_pharmacies,
         total_medicines=total_medicines,
         total_stock_units=total_stock_units,
-        total_inventory_value=total_inventory_value
+        total_inventory_value=total_inventory_value,
+        pharmacy_stats=pharmacy_stats,
+        medicine_stats=medicine_stats
     )
 
 
