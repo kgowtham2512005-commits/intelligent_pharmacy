@@ -211,7 +211,7 @@
               <th scope="col" class="py-3">Price</th>
               <th scope="col" class="py-3">Availability</th>
               <th scope="col" class="py-3">Stock</th>
-              <th scope="col" class="py-3 pe-4 text-end">Action</th>
+              <th scope="col" class="py-3 pe-4 text-end">Contact</th>
             </tr>
           </thead>
           <tbody class="border-top-0">
@@ -259,9 +259,7 @@
                   <span class="text-dark fw-medium">{{ p.stock_quantity }} units</span>
                 </td>
                 <td class="py-3 pe-4 text-end">
-                  <a href="tel:{{ p.phone }}" class="btn btn-sm btn-outline-teal rounded-pill px-3" style="border-color: #0d9488; color: #0d9488;">
-                    <i class="bi bi-telephone-fill me-1"></i> Call
-                  </a>
+                  <span class="fw-semibold text-dark fs-6">({{ p.phone }})</span>
                 </td>
               </tr>
             {% endfor %}
@@ -269,7 +267,7 @@
         </table>
       </div>
       <div class="text-muted small">
-        <i class="bi bi-info-circle me-1"></i> <strong>Note:</strong> Only active stock is shown. For detailed inquiries, please call the pharmacy directly.
+        <i class="bi bi-info-circle me-1"></i> <strong>Note:</strong> Only active stock is shown. For detailed inquiries, please contact the pharmacy directly.
       </div>
     {% else %}
       <div class="text-center py-5 text-muted bg-light rounded-4">
