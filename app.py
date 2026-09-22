@@ -3,6 +3,7 @@ import pymysql
 from flask import Flask, render_template, jsonify
 from config import Config
 from models.database import db
+from models.models import Admin, Pharmacy, Medicine, PharmacyInventory
 from routes.user_routes import user_bp
 from routes.admin_routes import admin_bp
 from routes.voice_routes import voice_bp
@@ -34,12 +35,18 @@ def create_app(config_class=Config):
     # Initialize database extension
     db.init_app(app)
 
-    # Auto-create tables if they don't exist
+    # Auto-create tables and seed data if database is fresh
     with app.app_context():
         try:
             db.create_all()
+            if Medicine.query.count() == 0:
+                try:
+                    from import_dataset import import_data
+                    import_data(app)
+                except Exception as seed_err:
+                    print(f"Dataset auto-seeding notice: {seed_err}")
         except Exception as e:
-            print(f"Database table check notice: {e}")
+            print(f"Database initialization notice: {e}")
 
     # Register blueprints
     app.register_blueprint(user_bp)

@@ -1,21 +1,19 @@
 import os
 import sys
 from datetime import datetime
-
-# Setup Flask application context
-from app import app
+from flask import has_app_context
+from werkzeug.security import generate_password_hash
 from models.database import db
 from models.models import Pharmacy, Medicine, PharmacyInventory, Admin
-from werkzeug.security import generate_password_hash
 
-def import_data():
+def import_data(app_instance=None):
     dataset_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dataset.txt')
     
     if not os.path.exists(dataset_path):
         print(f"Error: {dataset_path} not found.")
         return
 
-    with app.app_context():
+    def _execute_import():
         # Read the file
         with open(dataset_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
@@ -130,6 +128,17 @@ def import_data():
             
         db.session.commit()
         print(f"Successfully processed {count} inventory records.")
+
+    if has_app_context():
+        _execute_import()
+    elif app_instance:
+        with app_instance.app_context():
+            _execute_import()
+    else:
+        from app import create_app
+        app = create_app()
+        with app.app_context():
+            _execute_import()
 
 if __name__ == '__main__':
     import_data()
