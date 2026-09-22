@@ -57,7 +57,7 @@ def search_api():
 
 @user_bp.route('/search')
 def search_page():
-    """HTML search results view."""
+    """HTML search results view with support for real-time geolocation filtering."""
     query = request.args.get('q', '').strip()
     user_lat = request.args.get('lat')
     user_lng = request.args.get('lng')
@@ -106,8 +106,8 @@ def search_page():
 
 @user_bp.route('/medicine/<int:medicine_id>')
 def medicine_detail(medicine_id):
-    """Customer Medicine Result & Pharmacy Price Comparison Page."""
-    medicine = Medicine.query.get_or_404(medicine_id)
+    """Customer Medicine Result & Pharmacy Price Comparison Page with Real-time Distance."""
+    medicine = db.get_or_404(Medicine, medicine_id)
     user_lat = request.args.get('lat')
     user_lng = request.args.get('lng')
     sort_by = request.args.get('sort', 'price').lower()
@@ -121,9 +121,17 @@ def medicine_detail(medicine_id):
 
     for item in inventory_items:
         pharmacy = item.pharmacy
-        dist = pharmacy.distance_km
-        is_available = item.stock_quantity > 0
         
+        # Calculate real-time distance if user coordinates and pharmacy coordinates are available
+        dist = None
+        if user_lat and user_lng and pharmacy.latitude is not None and pharmacy.longitude is not None:
+            dist = calculate_distance(user_lat, user_lng, pharmacy.latitude, pharmacy.longitude)
+        
+        # Fall back to preset distance_km if real-time calculation is not possible
+        if dist is None:
+            dist = pharmacy.distance_km
+
+        is_available = item.stock_quantity > 0
         if is_available:
             available_prices.append(float(item.price))
 
@@ -144,11 +152,14 @@ def medicine_detail(medicine_id):
 
     lowest_available_price = min(available_prices) if available_prices else None
 
-    # Sorting
+    # Sorting options
     if sort_by == 'distance':
-        pharmacies_data.sort(key=lambda p: (p['distance'] if p['distance'] is not None else 99999, p['price']))
+        pharmacies_data.sort(key=lambda p: (not p['is_available'], p['distance'] if p['distance'] is not None else 99999, p['price']))
     elif sort_by == 'stock':
         pharmacies_data.sort(key=lambda p: (not p['is_available'], -p['stock_quantity'], p['price']))
+    else:  # default 'price'
+        pharmacies_data.sort(key=lambda p: (not p['is_available'], p['price'], p['distance'] if p['distance'] is not None else 99999))
+
     # Find generic/alternative medicines (Phase 15)
     from services.recommendation_service import find_alternatives
     alt_names = find_alternatives(medicine.medicine_name, medicine.generic_name, medicine.category)
@@ -182,4 +193,5 @@ def medicine_detail(medicine_id):
         user_lng=user_lng,
         sort_by=sort_by
     )
+
 

@@ -9,7 +9,7 @@ from models.models import Pharmacy, Medicine, PharmacyInventory, Admin
 from werkzeug.security import generate_password_hash
 
 def import_data():
-    dataset_path = 'dataset.txt'
+    dataset_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dataset.txt')
     
     if not os.path.exists(dataset_path):
         print(f"Error: {dataset_path} not found.")

@@ -178,7 +178,7 @@ def get_recommendations():
         })
 
     if medicine_id:
-        medicine = Medicine.query.get(medicine_id)
+        medicine = db.session.get(Medicine, medicine_id)
         if medicine:
             from services.recommendation_service import find_alternatives
             alt_names = find_alternatives(

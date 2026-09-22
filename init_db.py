@@ -5,10 +5,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def ensure_database():
+    env_db_url = os.getenv("DATABASE_URL") or os.getenv("SQLALCHEMY_DATABASE_URI")
+    db_type = os.getenv("DB_TYPE", "auto").lower()
+
+    if env_db_url or db_type == "sqlite":
+        return "configured"
+
     host = os.getenv("MYSQL_HOST", "localhost")
     port = int(os.getenv("MYSQL_PORT", "3306"))
     user = os.getenv("MYSQL_USER", "root")
-    password = os.getenv("MYSQL_PASSWORD", "")
+    password = os.getenv("MYSQL_PASSWORD", "root")
     db_name = os.getenv("MYSQL_DB", "ruralcare_ai")
 
     print(f"Connecting to MySQL server at {host}:{port} as user '{user}'...")
@@ -30,23 +36,23 @@ def ensure_database():
         os.environ["DB_TYPE"] = "sqlite"
         return "sqlite"
 
-def init_tables():
-    db_engine = ensure_database()
+def init_tables(seed=True):
+    ensure_database()
     
     from app import create_app
     from models.database import db
-    from config import Config
 
     app = create_app()
-    
-    if db_engine == "sqlite":
-        app.config["SQLALCHEMY_DATABASE_URI"] = Config.SQLITE_URI
 
     with app.app_context():
-        print(f"Recreating database tables using {app.config['SQLALCHEMY_DATABASE_URI']}...")
-        db.drop_all()
+        print(f"Ensuring database tables using {app.config['SQLALCHEMY_DATABASE_URI']}...")
         db.create_all()
         print("Database tables initialized successfully!")
 
+        if seed:
+            from import_dataset import import_data
+            import_data()
+
 if __name__ == "__main__":
     init_tables()
+

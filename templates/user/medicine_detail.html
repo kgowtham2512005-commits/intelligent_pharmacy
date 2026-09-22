@@ -301,9 +301,9 @@
     }
 
     const medName = {{ medicine.medicine_name|tojson }};
-    const genericName = {{ medicine.generic_name|tojson or '""' }};
-    const uses = {{ medicine.uses|tojson or '""' }};
-    const lowestPrice = {{ lowest_available_price|tojson or 'null' }};
+    const genericName = {{ (medicine.generic_name or '')|tojson }};
+    const uses = {{ (medicine.uses or '')|tojson }};
+    const lowestPrice = {{ lowest_available_price|tojson }};
 
     let textToSpeak = `Medicine details for ${medName}. `;
     if (genericName) textToSpeak += `Generic compound: ${genericName}. `;

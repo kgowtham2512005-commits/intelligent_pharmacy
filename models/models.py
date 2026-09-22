@@ -1,5 +1,8 @@
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from models.database import db
+
+def utc_now():
+    return datetime.now(timezone.utc)
 
 class Admin(db.Model):
     __tablename__ = 'admins'
@@ -7,7 +10,7 @@ class Admin(db.Model):
     admin_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(150), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    created_at = db.Column(db.DateTime, default=utc_now, nullable=False)
 
     # One-to-one relationship with Pharmacy
     pharmacy = db.relationship('Pharmacy', backref='admin', uselist=False, cascade='all, delete-orphan')
@@ -27,7 +30,7 @@ class Pharmacy(db.Model):
     latitude = db.Column(db.Numeric(10, 8), nullable=True)
     longitude = db.Column(db.Numeric(11, 8), nullable=True)
     distance_km = db.Column(db.Float, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    created_at = db.Column(db.DateTime, default=utc_now, nullable=False)
 
     # One-to-many relationship with PharmacyInventory
     inventory_items = db.relationship('PharmacyInventory', backref='pharmacy', cascade='all, delete-orphan')
@@ -48,7 +51,7 @@ class Medicine(db.Model):
     how_to_use = db.Column(db.Text, nullable=True)
     warnings = db.Column(db.Text, nullable=True)
     precautions = db.Column(db.Text, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    created_at = db.Column(db.DateTime, default=utc_now, nullable=False)
 
     # One-to-many relationship with PharmacyInventory
     inventory_items = db.relationship('PharmacyInventory', backref='medicine', cascade='all, delete-orphan')
@@ -66,7 +69,7 @@ class PharmacyInventory(db.Model):
     stock_quantity = db.Column(db.Integer, nullable=False, default=0)
     expiry_date = db.Column(db.Date, nullable=True)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
-    last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    last_updated = db.Column(db.DateTime, default=utc_now, onupdate=utc_now, nullable=False)
 
     __table_args__ = (
         db.UniqueConstraint('pharmacy_id', 'medicine_id', name='uq_pharmacy_medicine'),
@@ -89,4 +92,5 @@ class PharmacyInventory(db.Model):
 
     def __repr__(self):
         return f"<PharmacyInventory Pharmacy:{self.pharmacy_id} Med:{self.medicine_id}>"
+
 

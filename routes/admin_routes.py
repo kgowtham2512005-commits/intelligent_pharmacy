@@ -1,9 +1,9 @@
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from functools import wraps
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, g
 from werkzeug.security import generate_password_hash, check_password_hash
 from models.database import db
-from models.models import Admin, Pharmacy, Medicine, PharmacyInventory
+from models.models import Admin, Pharmacy, Medicine, PharmacyInventory, utc_now
 
 admin_bp = Blueprint('admin_bp', __name__, url_prefix='/admin')
 
@@ -421,7 +421,7 @@ def add_medicine():
                 inv.stock_quantity = stock_quantity
                 inv.expiry_date = expiry_date
                 inv.is_active = True
-                inv.last_updated = datetime.utcnow()
+                inv.last_updated = utc_now()
                 flash(f"Updated inventory for '{med.medicine_name}' in your pharmacy.", "info")
             else:
                 inv = PharmacyInventory(
@@ -517,7 +517,7 @@ def edit_medicine(inventory_id):
             inv.price = price
             inv.stock_quantity = stock_quantity
             inv.expiry_date = expiry_date
-            inv.last_updated = datetime.utcnow()
+            inv.last_updated = utc_now()
 
             db.session.commit()
             flash(f"Updated '{med.medicine_name}' successfully!", "success")
@@ -554,7 +554,7 @@ def quick_update(inventory_id):
                 return redirect(url_for('admin_bp.medicines'))
             inv.stock_quantity = new_stock
 
-        inv.last_updated = datetime.utcnow()
+        inv.last_updated = utc_now()
         db.session.commit()
         flash(f"Updated price (₹{inv.price}) and stock ({inv.stock_quantity}) for '{inv.medicine.medicine_name}'.", "success")
 
@@ -571,7 +571,7 @@ def toggle_status(inventory_id):
     inv = PharmacyInventory.query.filter_by(inventory_id=inventory_id, pharmacy_id=pharmacy.pharmacy_id).first_or_404()
 
     inv.is_active = not inv.is_active
-    inv.last_updated = datetime.utcnow()
+    inv.last_updated = utc_now()
     db.session.commit()
 
     new_status = "activated" if inv.is_active else "deactivated"
@@ -614,7 +614,7 @@ def master_dashboard():
 @admin_required
 def master_edit_pharmacy(pharmacy_id):
     """Master Admin: Edit any pharmacy profile."""
-    pharmacy = Pharmacy.query.get_or_404(pharmacy_id)
+    pharmacy = db.get_or_404(Pharmacy, pharmacy_id)
 
     if request.method == 'POST':
         shop_name = request.form.get('shop_name', '').strip()
@@ -652,7 +652,7 @@ def master_edit_pharmacy(pharmacy_id):
 @admin_required
 def master_delete_pharmacy(pharmacy_id):
     """Master Admin: Delete a pharmacy and all its inventory items."""
-    pharmacy = Pharmacy.query.get_or_404(pharmacy_id)
+    pharmacy = db.get_or_404(Pharmacy, pharmacy_id)
     name = pharmacy.shop_name
     try:
         db.session.delete(pharmacy)
@@ -669,7 +669,7 @@ def master_delete_pharmacy(pharmacy_id):
 @admin_required
 def master_edit_medicine(medicine_id):
     """Master Admin: Edit global medicine catalog entry."""
-    medicine = Medicine.query.get_or_404(medicine_id)
+    medicine = db.get_or_404(Medicine, medicine_id)
 
     if request.method == 'POST':
         medicine_name = request.form.get('medicine_name', '').strip()
@@ -711,7 +711,7 @@ def master_edit_medicine(medicine_id):
 @admin_required
 def master_delete_medicine(medicine_id):
     """Master Admin: Delete a global medicine and its cross-pharmacy inventory links."""
-    medicine = Medicine.query.get_or_404(medicine_id)
+    medicine = db.get_or_404(Medicine, medicine_id)
     name = medicine.medicine_name
     try:
         db.session.delete(medicine)
@@ -728,7 +728,7 @@ def master_delete_medicine(medicine_id):
 @admin_required
 def master_quick_update_inventory(inventory_id):
     """Master Admin: Quick update price and stock for any pharmacy's inventory item."""
-    inv = PharmacyInventory.query.get_or_404(inventory_id)
+    inv = db.get_or_404(PharmacyInventory, inventory_id)
     price_str = request.form.get('price', '').strip()
     stock_str = request.form.get('stock_quantity', '').strip()
 
@@ -747,7 +747,7 @@ def master_quick_update_inventory(inventory_id):
                 return redirect(url_for('admin_bp.master_dashboard'))
             inv.stock_quantity = new_stock
 
-        inv.last_updated = datetime.utcnow()
+        inv.last_updated = utc_now()
         db.session.commit()
         flash(f"Updated '{inv.medicine.medicine_name}' at '{inv.pharmacy.shop_name}': ₹{inv.price}, {inv.stock_quantity} units.", "success")
     except ValueError:
